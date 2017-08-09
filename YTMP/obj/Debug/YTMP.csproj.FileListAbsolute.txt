@@ -1,0 +1,9 @@
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\bin\Debug\YTMP.exe.config
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\bin\Debug\YTMP.exe
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\bin\Debug\YTMP.pdb
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.csprojResolveAssemblyReference.cache
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.MainForm.resources
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.Properties.Resources.resources
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.csproj.GenerateResource.Cache
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.exe
+c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.pdb
