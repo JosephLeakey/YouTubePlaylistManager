@@ -22,11 +22,11 @@ namespace YTMP
 
         private ContextMenu menu = new ContextMenu();
 
-        private int count = 0;
-
         private bool unsaved = false;
 
         const string searchBoxText = "Search through the playlist or add a video to it...";
+
+        private int i;
 
         public MainForm()
         {
@@ -38,11 +38,8 @@ namespace YTMP
             searchBox.Text = searchBoxText;
 
             menu.MenuItems.Add(new MenuItem("Delete", new EventHandler(DeleteRow)));
-        }
 
-        private void YTPlay(string ID)
-        {
-            player.Navigate("http://www.youtube.com/v/" + ID);
+            SetFullView(false);
         }
 
         private Dictionary<String, object> GetDJSON(string ID)
@@ -62,17 +59,17 @@ namespace YTMP
             }
         }
 
-        private bool Exists(string ID)
+        private int Exists(string ID)
         {
-            for (int i = 0; i < playlist.RowCount; i++)
+            foreach (DataGridViewRow row in playlist.Rows)
             {
-                if (playlist.Rows[i].Cells[1].Value.ToString() == ID)
+                if (row.Cells[1].Value.ToString().ToLower() == ID.ToLower())
                 {
-                    return true;
+                    return row.Index;
                 }
             }
 
-            return false;
+            return -1;
         }
 
         private void Export()
@@ -85,11 +82,11 @@ namespace YTMP
                     {
                         if (i < playlist.RowCount - 1)
                         {
-                            SW.WriteLine(playlist.Rows[i].Cells[1].Value.ToString());
+                            SW.WriteLine(playlist.Rows[i].Cells[1].Value.ToString() + " - [" + playlist.Rows[i].Cells[3].Value.ToString() + "] " + playlist.Rows[i].Cells[2].Value.ToString());
                         }
                         else
                         {
-                            SW.Write(playlist.Rows[i].Cells[1].Value.ToString());
+                            SW.Write(playlist.Rows[i].Cells[1].Value.ToString() + " - [" + playlist.Rows[i].Cells[3].Value.ToString() + "] " + playlist.Rows[i].Cells[2].Value.ToString());
                         }
                     }
                 }
@@ -98,53 +95,164 @@ namespace YTMP
             }
         }
 
-        private void DeleteRow(object sender, EventArgs e)
+        private void Import()
         {
-            for (int i = playlist.SelectedRows[0].Index; i < playlist.RowCount; i++)
+            if (loadFileDialog.ShowDialog() == DialogResult.OK)
             {
-                playlist.Rows[i].Cells[0].Value = (int)playlist.Rows[i].Cells[0].Value - 1;
+                string ID;
+
+                playlist.Rows.Clear();
+
+                using (System.IO.StreamReader SR = new System.IO.StreamReader(loadFileDialog.FileName))
+                {
+                    while ((ID = SR.ReadLine()) != null) {
+                        if (ID.Length > 10)
+                        {
+                            ID = ID.Substring(0, 11);
+
+                            DJSON = GetDJSON(ID);
+
+                            if (DJSON != null)
+                            {
+                                playlist.Rows.Add(playlist.RowCount + 1, ID, DJSON["title"], DJSON["author_name"]);
+                            }
+                        }
+                    }
+                }
+
+                DJSON = null;
             }
+        }
 
-            playlist.Rows.Remove(playlist.SelectedRows[0]);
+        private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            player.Navigate("http://www.youtube.com/v/" + playlist.SelectedRows[0].Cells[1].Value.ToString());
 
-            count -= 1;
+            videoNameLabel.Text = playlist.SelectedRows[0].Cells[2].Value.ToString();
+            videoUploaderLabel.Text = "Uploaded by " + playlist.SelectedRows[0].Cells[3].Value.ToString();
+            videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
+            videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
+            videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
+
+            SetFullView(true);
+        }
+
+        private void SetFullView(bool state)
+        {
+            if (state && this.MinimumSize.Width < 1280)
+            {
+                searchBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left);
+                addButton.Anchor = (AnchorStyles.Top | AnchorStyles.Left);
+                playlist.Anchor = (AnchorStyles.Top | AnchorStyles.Left);
+
+                this.Size = new Size(this.Width + 494, this.Height);
+                this.MinimumSize = new Size(1280, 720);
+
+                searchBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
+                addButton.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
+                playlist.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom);
+
+                player.Visible = true;
+                videoNameLabel.Visible = true;
+                videoUploaderLabel.Visible = true;
+                videoDescriptionBox.Visible = true;
+                previousButton.Visible = true;
+                nextButton.Visible = true;
+                minMaxToggleButton.Visible = true;
+            }
+            else if (!state && this.MinimumSize.Width == 1280)
+            {
+                player.Visible = false;
+                player.Stop();
+
+                videoNameLabel.Visible = false;
+                videoUploaderLabel.Visible = false;
+                videoDescriptionBox.Visible = false;
+                previousButton.Visible = false;
+                nextButton.Visible = false;
+                minMaxToggleButton.Visible = false;
+
+                searchBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left);
+                addButton.Anchor = (AnchorStyles.Top | AnchorStyles.Left);
+                playlist.Anchor = (AnchorStyles.Top | AnchorStyles.Left);
+
+                this.MinimumSize = new Size(786, 720);
+                this.Size = new Size(this.Width - 494, this.Height);
+
+                searchBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
+                addButton.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
+                playlist.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom);
+            }
         }
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
         {
-            if (searchBox.Text.Length > 10 && !Exists(searchBox.Text.Substring(searchBox.Text.Length - 11)))
+            if (searchBox.Text.Length == 0 || searchBox.ForeColor == SystemColors.ControlDark)
             {
-                DJSON = GetDJSON(searchBox.Text.Substring(searchBox.Text.Length - 11));
-
-                if (DJSON != null)
+                foreach (DataGridViewRow row in playlist.Rows)
                 {
-                    searchBox.Size = new Size(playlist.Size.Width - 104, searchBox.Size.Height);
-                    addButton.Visible = true;
+                    row.Visible = true;
+                }
 
-                    return;
+                return;
+            }
+
+            foreach (DataGridViewRow row in playlist.Rows)
+            {
+                row.Visible = false;
+            }
+
+            if (searchBox.Text.Length > 10)
+            {
+                int row = Exists(searchBox.Text.Substring(searchBox.Text.Length - 11));
+
+                if (row == -1)
+                {
+                    DJSON = GetDJSON(searchBox.Text.Substring(searchBox.Text.Length - 11));
+
+                    if (DJSON != null)
+                    {
+                        searchBox.Size = new Size(playlist.Size.Width - 104, searchBox.Size.Height);
+                        addButton.Visible = true;
+
+                        return;
+                    }
+                }
+                else
+                {
+                    playlist.Rows[row].Visible = true;
                 }
             }
 
             DJSON = null;
            
             addButton.Visible = false;
-            searchBox.Size = new Size(playlist.Size.Width, searchBox.Size.Height);
+
+            if (searchBox.Width < playlist.Size.Width)
+            {
+                searchBox.Size = new Size(playlist.Size.Width, searchBox.Size.Height);
+            }
+
+            for (int c = 0; c < playlist.RowCount; c++)
+            {
+                for (int d = 0; d < playlist.ColumnCount - 1; d++)
+                {
+                    if (d != 1 && playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(searchBox.Text.ToLower())) {
+                        playlist.Rows[c].Visible = true;
+
+                        break;
+                    }
+                }
+            }
         }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            count += 1;
-
-            playlist.Rows.Add(count, searchBox.Text.Substring(searchBox.Text.IndexOf("watch?v=") + 8), DJSON["title"], DJSON["author_name"]);
+            playlist.Rows.Add(playlist.RowCount + 1, searchBox.Text.Substring(searchBox.Text.IndexOf("watch?v=") + 8), DJSON["title"], DJSON["author_name"]);
 
             searchBox.Clear();
 
             unsaved = true;
-        }
-
-        private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            YTPlay(playlist.CurrentRow.Cells[1].Value.ToString());
         }
 
         private void MinMaxToggleButton_Click(object sender, EventArgs e)
@@ -158,6 +266,8 @@ namespace YTMP
                         C.Visible = false;
                     }
                 }
+
+                playlistOptionsButton.Visible = false;
 
                 player.Dock = DockStyle.Fill;
 
@@ -177,6 +287,8 @@ namespace YTMP
                     }
                 }
 
+                playlistOptionsButton.Visible = true;
+
                 if (DJSON != null)
                 {
                     addButton.Visible = true;
@@ -186,7 +298,7 @@ namespace YTMP
             }
         }
 
-        private void SearchBox_Click(object sender, EventArgs e)
+        private void searchBox_Enter(object sender, EventArgs e)
         {
             if (searchBox.ForeColor == SystemColors.ControlDark)
             {
@@ -215,16 +327,17 @@ namespace YTMP
         {
             if (unsaved)
             {
-                if (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.OK)
+                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
-                    Export();
+                    case (DialogResult.Yes):
+                        Export();
+                        break;
+                    case (DialogResult.Cancel):
+                        return;
                 }
             }
-            
-            if (loadFileDialog.ShowDialog() == DialogResult.OK)
-            {
 
-            }
+            Import();
         }
 
         private void playlist_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -235,6 +348,55 @@ namespace YTMP
 
                 menu.Show(this, this.PointToClient(MousePosition));
             }
+        }
+
+        private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        {
+            i = playlist.SelectedRows[0].Index;
+
+            for (int c = 1; c < playlist.SelectedRows.Count; c++)
+            {
+                if (playlist.SelectedRows[c].Index < i)
+                {
+                    i = playlist.SelectedRows[c].Index;
+                }
+            }
+        }
+
+        private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
+        {
+            for (int c = i; c < playlist.RowCount; c++)
+            {
+                playlist.Rows[c].Cells[0].Value = playlist.Rows[c].Index + 1;
+            }
+
+            unsaved = true;
+        }
+
+        private void DeleteRow(object sender, EventArgs e)
+        {
+            SendKeys.Send("{DEL}");
+        }
+
+        private void newPlaylistButton_Click(object sender, EventArgs e)
+        {
+            if (unsaved)
+            {
+                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you make a new one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
+                {
+                    case (DialogResult.Yes):
+                        Export();
+                        break;
+                    case (DialogResult.Cancel):
+                        return;
+                }
+            }
+
+            playlist.Rows.Clear();
+
+            searchBox.Clear();
+
+            unsaved = false;
         }
     }
 }

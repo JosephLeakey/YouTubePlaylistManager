@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YTMP", "YTMP\YTMP.csproj", "{7AF8C904-4A15-4AE7-9836-5EF6B6297E39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YTPM", "YTMP\YTPM.csproj", "{7AF8C904-4A15-4AE7-9836-5EF6B6297E39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

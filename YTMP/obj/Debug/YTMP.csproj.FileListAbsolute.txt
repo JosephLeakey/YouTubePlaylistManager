@@ -7,3 +7,12 @@ c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.P
 c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.csproj.GenerateResource.Cache
 c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.exe
 c:\users\joseph\documents\visual studio 2015\Projects\YTMP\YTMP\obj\Debug\YTMP.pdb
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\bin\Debug\YTMP.exe.config
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.exe
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.pdb
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\bin\Debug\YTMP.exe
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\bin\Debug\YTMP.pdb
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.csprojResolveAssemblyReference.cache
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.MainForm.resources
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.Properties.Resources.resources
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.csproj.GenerateResource.Cache
