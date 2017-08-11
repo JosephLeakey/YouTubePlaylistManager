@@ -9,22 +9,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web.Script.Serialization;
+using System.Collections;
 
 namespace YTMP
 {
     public partial class MainForm : System.Windows.Forms.Form
     {
+        private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
+
         private WebClient WC = new WebClient();
 
         private JavaScriptSerializer Serializer = new JavaScriptSerializer();
-
-        private Dictionary<String, object> DJSON;
 
         private ContextMenu menu = new ContextMenu();
 
         private bool unsaved = false;
 
-        const string searchBoxText = "Search through the playlist or add a video to it...";
+        private const string searchBoxText = "Search through the playlist or add a video to it...";
 
         private int i;
 
@@ -48,7 +49,7 @@ namespace YTMP
             {
                 try
                 {
-                    string JSON = WC.DownloadString("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + ID);
+                    string JSON = WC.DownloadString("https://www.googleapis.com/youtube/v3/videos?key=AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0&part=snippet,contentDetails&id=" + ID);
 
                     return Serializer.Deserialize<Dictionary<String, object>>(JSON);
                 }
@@ -59,7 +60,57 @@ namespace YTMP
             }
         }
 
-        private int Exists(string ID)
+        private string[] GetVideoDetails(Dictionary<String, object> DJSON)
+        {
+            string[] details = new string[4];
+
+            string time = "";
+
+            dynamic partial;
+
+            Dictionary<String, object> auxiliary;
+
+            partial = (ArrayList)DJSON["items"];
+            partial = partial[0];
+
+            auxiliary = partial["contentDetails"];
+
+            partial = (Dictionary<String, object>)partial["snippet"];
+            
+            details[0] = (string)partial["title"];
+            details[1] = (string)partial["channelTitle"];
+            details[2] = (string)partial["description"];
+
+            details[3] = (string)auxiliary["duration"];
+            details[3] = details[3].Substring(2).ToLower();
+
+            if (details[3].Contains("h"))
+            {
+                time += details[3].Substring(0, details[3].IndexOf("h")) + " : ";
+
+                details[3] = details[3].Substring(details[3].IndexOf("h") + 1);
+            }
+
+            if (details[3].Contains("m"))
+            {
+                time += details[3].Substring(0, details[3].IndexOf("m")) + " : ";
+
+                details[3] = details[3].Substring(details[3].IndexOf("m") + 1);
+            }
+
+            time += (int.Parse(details[3].Substring(0, details[3].IndexOf("s"))));
+
+            details[3] = time.ToString();
+
+            return details;
+        }
+
+        private string[] GetVideoDetails(string ID)
+        {
+            return GetVideoDetails(GetDJSON(ID));
+        }
+
+        private int EntryExists(string ID)
         {
             foreach (DataGridViewRow row in playlist.Rows)
             {
@@ -70,6 +121,23 @@ namespace YTMP
             }
 
             return -1;
+        }
+
+        private bool VideoExists(string ID)
+        {
+            using (WC)
+            {
+                try
+                {
+                    string JSON = WC.DownloadString("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + ID);
+
+                    return true;
+                }
+                catch (WebException WE)
+                {
+                    return false;
+                }
+            }
         }
 
         private void Export()
@@ -110,17 +178,15 @@ namespace YTMP
                         {
                             ID = ID.Substring(0, 11);
 
-                            DJSON = GetDJSON(ID);
-
-                            if (DJSON != null)
+                            if (VideoExists(ID))
                             {
-                                playlist.Rows.Add(playlist.RowCount + 1, ID, DJSON["title"], DJSON["author_name"]);
+                                string[] videoDetails = GetVideoDetails(ID);
+
+                                playlist.Rows.Add(playlist.RowCount + 1, ID, videoDetails[0], videoDetails[1], videoDetails[2], videoDetails[3]);
                             }
                         }
                     }
                 }
-
-                DJSON = null;
             }
         }
 
@@ -204,13 +270,11 @@ namespace YTMP
 
             if (searchBox.Text.Length > 10)
             {
-                int row = Exists(searchBox.Text.Substring(searchBox.Text.Length - 11));
+                int row = EntryExists(searchBox.Text.Substring(searchBox.Text.Length - 11));
 
                 if (row == -1)
                 {
-                    DJSON = GetDJSON(searchBox.Text.Substring(searchBox.Text.Length - 11));
-
-                    if (DJSON != null)
+                    if (VideoExists(searchBox.Text.Substring(searchBox.Text.Length - 11)))
                     {
                         searchBox.Size = new Size(playlist.Size.Width - 104, searchBox.Size.Height);
                         addButton.Visible = true;
@@ -223,8 +287,6 @@ namespace YTMP
                     playlist.Rows[row].Visible = true;
                 }
             }
-
-            DJSON = null;
            
             addButton.Visible = false;
 
@@ -248,7 +310,11 @@ namespace YTMP
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            playlist.Rows.Add(playlist.RowCount + 1, searchBox.Text.Substring(searchBox.Text.IndexOf("watch?v=") + 8), DJSON["title"], DJSON["author_name"]);
+            string ID = (searchBox.Text.Substring(searchBox.Text.Length - 11));
+
+            string[] videoDetails = GetVideoDetails(ID);
+
+            playlist.Rows.Add(playlist.RowCount + 1, ID, videoDetails[0], videoDetails[1], videoDetails[2], videoDetails[3]);
 
             searchBox.Clear();
 
@@ -289,7 +355,7 @@ namespace YTMP
 
                 playlistOptionsButton.Visible = true;
 
-                if (DJSON != null)
+                if (VideoExists(searchBox.Text.Substring(searchBox.Text.Length - 11)))
                 {
                     addButton.Visible = true;
                 }
