@@ -7,3 +7,8 @@ C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTPM.cspr
 C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.exe
 C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTMP.pdb
 C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTPM.csprojResolveAssemblyReference.cache
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\Interop.SHDocVw.dll
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\AxInterop.SHDocVw.dll
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\Debug\YTPM.csproj.ResolveComReference.cache
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\bin\Debug\Interop.SHDocVw.dll
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\bin\Debug\AxInterop.SHDocVw.dll

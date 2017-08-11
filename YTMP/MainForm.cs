@@ -18,6 +18,41 @@ namespace YTMP
         //The API key used to access YouTube's servers
         private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
 
+        private const string playerA = @"<meta http-equiv=""X-UA-Compatible"" content=""IE=edge""/>
+ <html>
+  <body style=""margin: 0"">
+    <div id=""player""></div>
+
+    <script>
+      var tag = document.createElement('script');
+
+        tag.src = ""https://www.youtube.com/iframe_api"";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+	  
+      var player;
+        function onYouTubeIframeAPIReady()
+        {
+            player = new YT.Player('player', {
+          height: '270',
+          width: '480',
+          videoId: '";
+
+        private const string playerB = @"',
+          events: {
+            'onReady': onPlayerReady
+          }
+        });
+      }
+
+      function onPlayerReady(event) {
+        event.target.playVideo();
+      }
+    </script>
+	
+  </body>
+</html>";
+
         //Enables the program to download JSON files from YouTube's servers
         private WebClient WC = new WebClient();
 
@@ -229,7 +264,11 @@ namespace YTMP
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            player.Navigate("http://www.youtube.com/v/" + playlist.SelectedRows[0].Cells[1].Value.ToString());
+            player.DocumentText = "0";
+            player.Document.OpenNew(true);
+            player.Document.Write(playerA + playlist.SelectedRows[0].Cells[1].Value.ToString() + playerB);
+            //player.Document.Write(playerT);
+            player.Refresh();
 
             videoNameLabel.Text = playlist.SelectedRows[0].Cells[2].Value.ToString();
             videoUploaderLabel.Text = "Uploaded by " + playlist.SelectedRows[0].Cells[3].Value.ToString();
