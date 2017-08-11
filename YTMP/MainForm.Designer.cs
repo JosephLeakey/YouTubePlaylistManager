@@ -379,7 +379,6 @@
             this.length.HeaderText = "Length";
             this.length.Name = "length";
             this.length.ReadOnly = true;
-            this.length.Width = 75;
             // 
             // MainForm
             // 

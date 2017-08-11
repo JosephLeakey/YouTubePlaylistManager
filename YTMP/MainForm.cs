@@ -15,18 +15,25 @@ namespace YTMP
 {
     public partial class MainForm : System.Windows.Forms.Form
     {
+        //The API key used to access YouTube's servers
         private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
 
+        //Enables the program to download JSON files from YouTube's servers
         private WebClient WC = new WebClient();
 
-        private JavaScriptSerializer Serializer = new JavaScriptSerializer();
+        //De-serializes JSON files into dictionaries
+        private JavaScriptSerializer serializer = new JavaScriptSerializer();
 
+        //The menu that will be displayed when a row in the playlist is right-clicked on
         private ContextMenu menu = new ContextMenu();
 
+        //Tracks whether or not changes have been made to the current playlist since it was previously exported/imported
         private bool unsaved = false;
 
+        //The text to be displayed in the searchbar when it's inactive
         private const string searchBoxText = "Search through the playlist or add a video to it...";
 
+        //Tracks the indexes of the playlist entries that users may choose to delete
         private int i;
 
         public MainForm()
@@ -34,8 +41,10 @@ namespace YTMP
             InitializeComponent();
         }
 
+        //Executed when the form is loaded
         private void MainForm_Load(object sender, EventArgs e)
         {
+            //Display placeholder text within the search-bar
             searchBox.Text = searchBoxText;
 
             menu.MenuItems.Add(new MenuItem("Delete", new EventHandler(DeleteRow)));
@@ -51,7 +60,7 @@ namespace YTMP
                 {
                     string JSON = WC.DownloadString("https://www.googleapis.com/youtube/v3/videos?key=AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0&part=snippet,contentDetails&id=" + ID);
 
-                    return Serializer.Deserialize<Dictionary<String, object>>(JSON);
+                    return serializer.Deserialize<Dictionary<String, object>>(JSON);
                 }
                 catch (WebException WE)
                 {
@@ -80,27 +89,44 @@ namespace YTMP
             details[0] = (string)partial["title"];
             details[1] = (string)partial["channelTitle"];
             details[2] = (string)partial["description"];
+            details[2] = details[2].Replace("\n", "\r\n");
 
             details[3] = (string)auxiliary["duration"];
-            details[3] = details[3].Substring(2).ToLower();
+            details[3] = details[3].Substring(1).ToLower();
+
+            if (details[3].Contains("d"))
+            {
+                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("d")))) + " : ";
+            }
+
+            details[3] = details[3].Substring(details[3].IndexOf("t") + 1);
 
             if (details[3].Contains("h"))
             {
-                time += details[3].Substring(0, details[3].IndexOf("h")) + " : ";
+                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("h")))) + " : ";
 
                 details[3] = details[3].Substring(details[3].IndexOf("h") + 1);
             }
 
             if (details[3].Contains("m"))
             {
-                time += details[3].Substring(0, details[3].IndexOf("m")) + " : ";
+                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("m")))) + " : ";
 
                 details[3] = details[3].Substring(details[3].IndexOf("m") + 1);
+            } else
+            {
+                time += "00 : ";
             }
 
-            time += (int.Parse(details[3].Substring(0, details[3].IndexOf("s"))));
-
-            details[3] = time.ToString();
+            if (details[3].Contains("s"))
+            {
+                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("s"))));
+            } else
+            {
+                time += "00";
+            }
+            
+            details[3] = time;
 
             return details;
         }
@@ -171,6 +197,8 @@ namespace YTMP
 
                 playlist.Rows.Clear();
 
+                SetFullView(false);
+
                 using (System.IO.StreamReader SR = new System.IO.StreamReader(loadFileDialog.FileName))
                 {
                     while ((ID = SR.ReadLine()) != null) {
@@ -190,6 +218,15 @@ namespace YTMP
             }
         }
 
+        private void ResetSearchBar()
+        {
+            searchBox.ForeColor = SystemColors.ControlDark;
+            searchBox.Font = new Font(searchBox.Font, FontStyle.Italic);
+            searchBox.Text = searchBoxText;
+
+            playlist.Focus();
+        }
+
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             player.Navigate("http://www.youtube.com/v/" + playlist.SelectedRows[0].Cells[1].Value.ToString());
@@ -197,6 +234,7 @@ namespace YTMP
             videoNameLabel.Text = playlist.SelectedRows[0].Cells[2].Value.ToString();
             videoUploaderLabel.Text = "Uploaded by " + playlist.SelectedRows[0].Cells[3].Value.ToString();
             videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
+            videoDescriptionBox.Text = playlist.SelectedRows[0].Cells[4].Value.ToString();
             videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
             videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
 
@@ -253,51 +291,53 @@ namespace YTMP
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
         {
+            if (addButton.Visible)
+            {
+                addButton.Visible = false;
+                searchBox.Size = new Size(playlist.Size.Width, searchBox.Size.Height);
+            }
+
             if (searchBox.Text.Length == 0 || searchBox.ForeColor == SystemColors.ControlDark)
             {
-                foreach (DataGridViewRow row in playlist.Rows)
+                foreach (DataGridViewRow entry in playlist.Rows)
                 {
-                    row.Visible = true;
+                    entry.Visible = true;
                 }
 
                 return;
             }
 
-            foreach (DataGridViewRow row in playlist.Rows)
-            {
-                row.Visible = false;
-            }
+            int row = -1;
 
             if (searchBox.Text.Length > 10)
             {
-                int row = EntryExists(searchBox.Text.Substring(searchBox.Text.Length - 11));
+                row = EntryExists(searchBox.Text.Substring(searchBox.Text.Length - 11));
 
-                if (row == -1)
+                if (row == -1 && VideoExists(searchBox.Text.Substring(searchBox.Text.Length - 11)))
                 {
-                    if (VideoExists(searchBox.Text.Substring(searchBox.Text.Length - 11)))
+                    searchBox.Size = new Size(playlist.Size.Width - 104, searchBox.Size.Height);
+                    addButton.Visible = true;
+
+                    foreach (DataGridViewRow entry in playlist.Rows)
                     {
-                        searchBox.Size = new Size(playlist.Size.Width - 104, searchBox.Size.Height);
-                        addButton.Visible = true;
-
-                        return;
+                        entry.Visible = true;
                     }
-                }
-                else
-                {
-                    playlist.Rows[row].Visible = true;
+
+                    return;
                 }
             }
-           
-            addButton.Visible = false;
 
-            if (searchBox.Width < playlist.Size.Width)
+            foreach (DataGridViewRow entry in playlist.Rows)
             {
-                searchBox.Size = new Size(playlist.Size.Width, searchBox.Size.Height);
+                if (entry.Index != row)
+                {
+                    entry.Visible = false;
+                }
             }
 
             for (int c = 0; c < playlist.RowCount; c++)
             {
-                for (int d = 0; d < playlist.ColumnCount - 1; d++)
+                for (int d = 0; d < playlist.ColumnCount - 2; d++)
                 {
                     if (d != 1 && playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(searchBox.Text.ToLower())) {
                         playlist.Rows[c].Visible = true;
@@ -316,7 +356,7 @@ namespace YTMP
 
             playlist.Rows.Add(playlist.RowCount + 1, ID, videoDetails[0], videoDetails[1], videoDetails[2], videoDetails[3]);
 
-            searchBox.Clear();
+            ResetSearchBar();
 
             unsaved = true;
         }
@@ -378,9 +418,7 @@ namespace YTMP
         {
             if (searchBox.TextLength == 0)
             {
-                searchBox.ForeColor = SystemColors.ControlDark;
-                searchBox.Font = new Font(searchBox.Font, FontStyle.Italic);
-                searchBox.Text = searchBoxText;
+                ResetSearchBar();
             }
         }
 
@@ -460,7 +498,9 @@ namespace YTMP
 
             playlist.Rows.Clear();
 
-            searchBox.Clear();
+            SetFullView(false);
+
+            ResetSearchBar();
 
             unsaved = false;
         }
