@@ -60,7 +60,7 @@
             this.videoDescriptionBox = new System.Windows.Forms.TextBox();
             this.previousButton = new System.Windows.Forms.Button();
             this.nextButton = new System.Windows.Forms.Button();
-            this.player = new System.Windows.Forms.WebBrowser();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.playlist)).BeginInit();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -366,20 +366,6 @@
             this.nextButton.UseVisualStyleBackColor = true;
             this.nextButton.Visible = false;
             // 
-            // player
-            // 
-            this.player.AllowWebBrowserDrop = false;
-            this.player.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.player.IsWebBrowserContextMenuEnabled = false;
-            this.player.Location = new System.Drawing.Point(770, 31);
-            this.player.MinimumSize = new System.Drawing.Size(480, 270);
-            this.player.Name = "player";
-            this.player.ScriptErrorsSuppressed = true;
-            this.player.ScrollBarsEnabled = false;
-            this.player.Size = new System.Drawing.Size(480, 270);
-            this.player.TabIndex = 0;
-            this.player.Visible = false;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -394,7 +380,6 @@
             this.Controls.Add(this.addButton);
             this.Controls.Add(this.searchBox);
             this.Controls.Add(this.playlist);
-            this.Controls.Add(this.player);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             this.MinimumSize = new System.Drawing.Size(1280, 720);
@@ -442,7 +427,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn description;
         private System.Windows.Forms.DataGridViewTextBoxColumn length;
         private System.Windows.Forms.Button nextButton;
-        private System.Windows.Forms.WebBrowser player;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 

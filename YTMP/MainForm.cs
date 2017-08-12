@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web.Script.Serialization;
 using System.Collections;
+using CefSharp;
+using CefSharp.WinForms;
 
 namespace YTMP
 {
@@ -18,7 +20,7 @@ namespace YTMP
         //The API key used to access YouTube's servers
         private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
 
-        private const string playerA = @"<meta http-equiv=""X-UA-Compatible"" content=""IE=edge""/>
+        private const string HTML = @"<meta http-equiv=""X-UA-Compatible"" content=""IE=edge""/>
  <html>
   <body style=""margin: 0"">
     <div id=""player""></div>
@@ -33,14 +35,11 @@ namespace YTMP
       var player;
         function onYouTubeIframeAPIReady()
         {
-            player = new YT.Player('player', {
-          height: '270',
-          width: '480',
-          videoId: '";
-
-        private const string playerB = @"',
-          events: {
-            'onReady': onPlayerReady
+          player = new YT.Player('player', {
+            height: '270',
+            width: '480',
+            events: {
+              'onReady': onPlayerReady
           }
         });
       }
@@ -52,6 +51,8 @@ namespace YTMP
 	
   </body>
 </html>";
+
+        private ChromiumWebBrowser player;
 
         //Enables the program to download JSON files from YouTube's servers
         private WebClient WC = new WebClient();
@@ -74,6 +75,21 @@ namespace YTMP
         public MainForm()
         {
             InitializeComponent();
+
+            InitializeBrowser();
+        }
+
+        public void InitializeBrowser()
+        {
+            Cef.Initialize(new CefSettings());
+
+            player = new ChromiumWebBrowser(string.Empty);
+            player.Size = new Size(480, 270);
+            player.Location = new Point(770, 31);
+            player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
+            player.LoadHtml(HTML, "http://HTML/");
+            this.Controls.Add(player);
+
         }
 
         //Executed when the form is loaded
@@ -264,11 +280,7 @@ namespace YTMP
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            player.DocumentText = "0";
-            player.Document.OpenNew(true);
-            player.Document.Write(playerA + playlist.SelectedRows[0].Cells[1].Value.ToString() + playerB);
-            //player.Document.Write(playerT);
-            player.Refresh();
+            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + playlist.SelectedRows[0].Cells[1].Value + @""")");
 
             videoNameLabel.Text = playlist.SelectedRows[0].Cells[2].Value.ToString();
             videoUploaderLabel.Text = "Uploaded by " + playlist.SelectedRows[0].Cells[3].Value.ToString();
@@ -306,8 +318,6 @@ namespace YTMP
             else if (!state && this.MinimumSize.Width == 1280)
             {
                 player.Visible = false;
-                player.Stop();
-
                 videoNameLabel.Visible = false;
                 videoUploaderLabel.Visible = false;
                 videoDescriptionBox.Visible = false;
