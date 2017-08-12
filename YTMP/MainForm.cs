@@ -12,9 +12,12 @@ using System.Web.Script.Serialization;
 using System.Collections;
 using CefSharp;
 using CefSharp.WinForms;
+using System.Security.Permissions;
 
 namespace YTMP
 {
+    [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
+    [System.Runtime.InteropServices.ComVisible(true)]
     public partial class MainForm : System.Windows.Forms.Form
     {
         //The API key used to access YouTube's servers
@@ -28,27 +31,41 @@ namespace YTMP
     <script>
       var tag = document.createElement('script');
 
-        tag.src = ""https://www.youtube.com/iframe_api"";
+      tag.src = ""https://www.youtube.com/iframe_api"";
       var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 	  
       var player;
-        function onYouTubeIframeAPIReady()
-        {
-          player = new YT.Player('player', {
-            height: '270',
-            width: '480',
-            events: {
-              'onReady': onPlayerReady
-          }
+
+      function onYouTubeIframeAPIReady()
+      {
+        player = new YT.Player('player', {
+          height: '100%',
+          width: '100%',
+          playerVars: {
+            autoplay: 1,
+            enablejsapi: 1,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            rel: 0
+            },
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+            }
         });
       }
 
       function onPlayerReady(event) {
         event.target.playVideo();
       }
+
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.ENDED) {
+            window.nextVideo();
+        }
+      }
     </script>
-	
   </body>
 </html>";
 
@@ -70,7 +87,11 @@ namespace YTMP
         private const string searchBoxText = "Search through the playlist or add a video to it...";
 
         //Tracks the indexes of the playlist entries that users may choose to delete
-        private int i;
+        private int deletionIndex;
+
+        private int currentRow;
+
+        private string currentID;
 
         public MainForm()
         {
@@ -86,10 +107,14 @@ namespace YTMP
             player = new ChromiumWebBrowser(string.Empty);
             player.Size = new Size(480, 270);
             player.Location = new Point(770, 31);
+            player.BackColor = Color.Black;
             player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
-            player.LoadHtml(HTML, "http://HTML/");
-            this.Controls.Add(player);
 
+            player.LoadHtml(HTML, "http://HTML/");
+            player.RegisterJsObject("nextVideo", NextVideo());
+
+            this.Controls.Add(player);
+            player.BringToFront();
         }
 
         //Executed when the form is loaded
@@ -136,7 +161,7 @@ namespace YTMP
             auxiliary = partial["contentDetails"];
 
             partial = (Dictionary<String, object>)partial["snippet"];
-            
+
             details[0] = (string)partial["title"];
             details[1] = (string)partial["channelTitle"];
             details[2] = (string)partial["description"];
@@ -164,7 +189,8 @@ namespace YTMP
                 time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("m")))) + " : ";
 
                 details[3] = details[3].Substring(details[3].IndexOf("m") + 1);
-            } else
+            }
+            else
             {
                 time += "00 : ";
             }
@@ -172,11 +198,12 @@ namespace YTMP
             if (details[3].Contains("s"))
             {
                 time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("s"))));
-            } else
+            }
+            else
             {
                 time += "00";
             }
-            
+
             details[3] = time;
 
             return details;
@@ -252,7 +279,8 @@ namespace YTMP
 
                 using (System.IO.StreamReader SR = new System.IO.StreamReader(loadFileDialog.FileName))
                 {
-                    while ((ID = SR.ReadLine()) != null) {
+                    while ((ID = SR.ReadLine()) != null)
+                    {
                         if (ID.Length > 10)
                         {
                             ID = ID.Substring(0, 11);
@@ -280,16 +308,57 @@ namespace YTMP
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + playlist.SelectedRows[0].Cells[1].Value + @""")");
+            PlayVideo(playlist.SelectedRows[0].Index);
+        }
 
-            videoNameLabel.Text = playlist.SelectedRows[0].Cells[2].Value.ToString();
-            videoUploaderLabel.Text = "Uploaded by " + playlist.SelectedRows[0].Cells[3].Value.ToString();
+        private void PlayVideo(int rowIndex)
+        {
+            currentRow = (int)playlist.Rows[rowIndex].Cells[0].Value;
+            currentID = playlist.Rows[rowIndex].Cells[1].Value.ToString();
+
+            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + currentID + @""")");
+
+            videoNameLabel.Text = playlist.Rows[rowIndex].Cells[2].Value.ToString();
+            videoUploaderLabel.Text = "Uploaded by " + playlist.Rows[rowIndex].Cells[3].Value.ToString();
             videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
-            videoDescriptionBox.Text = playlist.SelectedRows[0].Cells[4].Value.ToString();
+            videoDescriptionBox.Text = playlist.Rows[rowIndex].Cells[4].Value.ToString();
             videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
             videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
 
             SetFullView(true);
+        }
+
+        private object NextVideo()
+        {
+            if (playlist.RowCount > 0)
+            {
+                foreach (DataGridViewRow row in playlist.Rows)
+                {
+                    if (row.Cells[1].Value.ToString() == currentID)
+                    {
+                        if (row.Index < playlist.RowCount - 1)
+                        {
+                            PlayVideo(row.Index + 1);
+                        }
+                        else
+                        {
+                            PlayVideo(0);
+                        }
+
+                        return null;
+                    }
+                }
+
+                if (playlist.RowCount < currentRow)
+                {
+                    PlayVideo(playlist.RowCount - 1);
+                } else
+                {
+                    PlayVideo(currentRow);
+                }
+            }
+
+            return null;
         }
 
         private void SetFullView(bool state)
@@ -388,7 +457,8 @@ namespace YTMP
             {
                 for (int d = 0; d < playlist.ColumnCount - 2; d++)
                 {
-                    if (d != 1 && playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(searchBox.Text.ToLower())) {
+                    if (d != 1 && playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(searchBox.Text.ToLower()))
+                    {
                         playlist.Rows[c].Visible = true;
 
                         break;
@@ -505,20 +575,20 @@ namespace YTMP
 
         private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            i = playlist.SelectedRows[0].Index;
+            deletionIndex = playlist.SelectedRows[0].Index;
 
             for (int c = 1; c < playlist.SelectedRows.Count; c++)
             {
-                if (playlist.SelectedRows[c].Index < i)
+                if (playlist.SelectedRows[c].Index < deletionIndex)
                 {
-                    i = playlist.SelectedRows[c].Index;
+                    deletionIndex = playlist.SelectedRows[c].Index;
                 }
             }
         }
 
         private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
-            for (int c = i; c < playlist.RowCount; c++)
+            for (int c = deletionIndex; c < playlist.RowCount; c++)
             {
                 playlist.Rows[c].Cells[0].Value = playlist.Rows[c].Index + 1;
             }
