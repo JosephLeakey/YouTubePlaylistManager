@@ -29,12 +29,6 @@
         private void InitializeComponent()
         {
             this.playlist = new System.Windows.Forms.DataGridView();
-            this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.videoName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.uploader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.description = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.length = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.playlistOptionsButton = new System.Windows.Forms.ToolStripMenuItem();
             this.newPlaylistButton = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,6 +55,12 @@
             this.previousButton = new System.Windows.Forms.Button();
             this.nextButton = new System.Windows.Forms.Button();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.videoName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.uploader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.length = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.playlist)).BeginInit();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -95,53 +95,6 @@
             this.playlist.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.playlist_CellMouseClick);
             this.playlist.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.playlist_RowsRemoved);
             this.playlist.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.playlist_UserDeletingRow);
-            // 
-            // index
-            // 
-            this.index.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.index.Frozen = true;
-            this.index.HeaderText = "#";
-            this.index.Name = "index";
-            this.index.ReadOnly = true;
-            this.index.Width = 50;
-            // 
-            // ID
-            // 
-            this.ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.ID.HeaderText = "ID";
-            this.ID.Name = "ID";
-            this.ID.ReadOnly = true;
-            this.ID.Visible = false;
-            // 
-            // videoName
-            // 
-            this.videoName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.videoName.HeaderText = "Name";
-            this.videoName.Name = "videoName";
-            this.videoName.ReadOnly = true;
-            // 
-            // uploader
-            // 
-            this.uploader.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.uploader.HeaderText = "Uploader";
-            this.uploader.Name = "uploader";
-            this.uploader.ReadOnly = true;
-            this.uploader.Width = 200;
-            // 
-            // description
-            // 
-            this.description.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.description.HeaderText = "Description";
-            this.description.Name = "description";
-            this.description.ReadOnly = true;
-            this.description.Visible = false;
-            // 
-            // length
-            // 
-            this.length.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.length.HeaderText = "Length";
-            this.length.Name = "length";
-            this.length.ReadOnly = true;
             // 
             // menuStrip
             // 
@@ -370,6 +323,59 @@
             this.nextButton.Visible = false;
             this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
             // 
+            // index
+            // 
+            this.index.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.index.Frozen = true;
+            this.index.HeaderText = "#";
+            this.index.Name = "index";
+            this.index.ReadOnly = true;
+            this.index.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.index.Width = 50;
+            // 
+            // ID
+            // 
+            this.ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.ID.HeaderText = "ID";
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
+            this.ID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ID.Visible = false;
+            // 
+            // videoName
+            // 
+            this.videoName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.videoName.HeaderText = "Name";
+            this.videoName.Name = "videoName";
+            this.videoName.ReadOnly = true;
+            this.videoName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // uploader
+            // 
+            this.uploader.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.uploader.HeaderText = "Uploader";
+            this.uploader.Name = "uploader";
+            this.uploader.ReadOnly = true;
+            this.uploader.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.uploader.Width = 200;
+            // 
+            // description
+            // 
+            this.description.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.description.HeaderText = "Description";
+            this.description.Name = "description";
+            this.description.ReadOnly = true;
+            this.description.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.description.Visible = false;
+            // 
+            // length
+            // 
+            this.length.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.length.HeaderText = "Length";
+            this.length.Name = "length";
+            this.length.ReadOnly = true;
+            this.length.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -422,16 +428,16 @@
         private System.Windows.Forms.Label videoUploaderLabel;
         private System.Windows.Forms.TextBox videoDescriptionBox;
         private System.Windows.Forms.Button previousButton;
+        private System.Windows.Forms.Button nextButton;
+        private System.ComponentModel.BackgroundWorker backgroundWorker;
+        public System.Windows.Forms.SaveFileDialog saveFileDialog;
+        public System.Windows.Forms.OpenFileDialog loadFileDialog;
         private System.Windows.Forms.DataGridViewTextBoxColumn index;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
         private System.Windows.Forms.DataGridViewTextBoxColumn videoName;
         private System.Windows.Forms.DataGridViewTextBoxColumn uploader;
         private System.Windows.Forms.DataGridViewTextBoxColumn description;
         private System.Windows.Forms.DataGridViewTextBoxColumn length;
-        private System.Windows.Forms.Button nextButton;
-        private System.ComponentModel.BackgroundWorker backgroundWorker;
-        public System.Windows.Forms.SaveFileDialog saveFileDialog;
-        public System.Windows.Forms.OpenFileDialog loadFileDialog;
     }
 }
 

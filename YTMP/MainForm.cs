@@ -80,6 +80,15 @@ namespace YTMP
         //Tracks whether or not changes have been made to the current playlist since it was previously exported/imported
         private bool unsaved = false;
 
+        //Tracks the indexes of the playlist entries that users may choose to delete
+        private int deletionIndex;
+
+        public DataGridViewRow current;
+
+        public bool autoplay = true;
+
+        public bool shuffle = false;
+
         public MainForm()
         {
             framework = new Framework();
@@ -196,9 +205,9 @@ namespace YTMP
 
         public void PlayVideo(DataGridViewRow row)
         {
-            framework.UpdateVideo(row);
+            current = row;
 
-            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + row.Cells[1].Value + @""")");
+            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + current.Cells[1].Value + @""")");
 
             if (InvokeRequired)
             {
@@ -364,19 +373,53 @@ namespace YTMP
 
         private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            if (framework.DeletionPreparation(playlist.SelectedRows))
+            deletionIndex = playlist.SelectedRows[0].Index;
+
+            for (int c = 1; c < playlist.SelectedRows.Count; c++)
             {
-                UpdateVideoNameTag(0);
+                if (playlist.SelectedRows[c].Index < deletionIndex)
+                {
+                    deletionIndex = playlist.SelectedRows[c].Index;
+                }
+            }
+
+            if (player.Visible)
+            {
+                foreach (DataGridViewRow row in playlist.SelectedRows)
+                {
+                    if (row.Cells[1].Value.ToString() == current.Cells[1].Value.ToString())
+                    {
+                        UpdateVideoNameTag(0);
+
+                        return;
+                    }
+                }
             }
         }
 
         private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
-        {
-            int number = framework.DeletionCompletion(playlist);
+        { 
+            for (int c = deletionIndex; c < playlist.RowCount; c++)
+            {
+                playlist.Rows[c].Cells[0].Value = c + 1;
+            }
+
+            if (current == null)
+            {
+                return;
+            }
 
             if (player.Visible)
             {
-                UpdateVideoNameTag(number);
+                foreach (DataGridViewRow row in playlist.Rows)
+                {
+                    if (row.Cells[1].Value.ToString() == current.Cells[1].Value.ToString())
+                    {
+                        current = row;
+
+                        UpdateVideoNameTag((int)current.Cells[1].Value);
+                    }
+                }
             }
         }
 
@@ -408,7 +451,7 @@ namespace YTMP
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            DataGridViewRow nextVideo = framework.Advance(playlist);
+            DataGridViewRow nextVideo = framework.Advance(playlist, current);
 
             if (nextVideo != null)
             {
@@ -418,7 +461,7 @@ namespace YTMP
 
         private void previousButton_Click(object sender, EventArgs e)
         {
-            DataGridViewRow previousVideo = framework.Retreat(playlist);
+            DataGridViewRow previousVideo = framework.Retreat(playlist, current);
 
             if (previousVideo != null)
             {
@@ -428,7 +471,9 @@ namespace YTMP
 
         private void autoPlayToggleButton_Click(object sender, EventArgs e)
         {
-            if (framework.ToggleAutoplay())
+            autoplay = !autoplay;
+
+            if (autoplay)
             {
                 autoPlayToggleButton.Text = "Auto-Play: ON";
             }
@@ -440,7 +485,7 @@ namespace YTMP
 
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
-            framework.FindCurrentVideo(playlist);
+            framework.FindCurrentVideo(playlist, current);
         }
 
         private void UpdateVideoName(string name, int number)
@@ -497,9 +542,9 @@ namespace YTMP
 
         public void NextVideo()
         {
-            if (framework.autoplay)
+            if (form.autoplay)
             {
-                form.PlayVideo(framework.Advance(playlist));
+                form.PlayVideo(framework.Advance(playlist, form.current));
             }
         }
     }

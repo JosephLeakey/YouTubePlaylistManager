@@ -20,14 +20,7 @@ namespace YTMP
         //De-serializes JSON files into dictionaries
         private JavaScriptSerializer serializer = new JavaScriptSerializer();
 
-        //Tracks the indexes of the playlist entries that users may choose to delete
-        private int deletionIndex;
-
-        private DataGridViewRow current;
-
-        public bool autoplay = true;
-
-        public bool shuffle = false;
+        
 
         private List<string> shuffleStack = new List<string>();
 
@@ -215,12 +208,7 @@ namespace YTMP
             playlist.Rows.Add(playlist.Rows.Count + 1, ID, details[0], details[1], details[2], details[3]);
         }
 
-        public void UpdateVideo(DataGridViewRow entry)
-        {
-            current = entry;
-        }
-
-        public DataGridViewRow Advance(DataGridView playlist)
+        public DataGridViewRow Advance(DataGridView playlist, DataGridViewRow current)
         {
             DataGridViewRow next = NextVideo(playlist, current.Cells[1].Value.ToString());
 
@@ -283,7 +271,7 @@ namespace YTMP
             return null;
         }
 
-        public DataGridViewRow Retreat(DataGridView playlist)
+        public DataGridViewRow Retreat(DataGridView playlist, DataGridViewRow current)
         {
             DataGridViewRow previous = PreviousVideo(playlist, current.Cells[1].Value.ToString());
 
@@ -365,9 +353,13 @@ namespace YTMP
 
                 if (row != -1)
                 {
-                    return false;
+                    return true;
                 }
+
+                return false;
             }
+
+            text = text.ToLower();
 
             for (int c = 0; c < playlist.RowCount; c++)
             {
@@ -385,54 +377,6 @@ namespace YTMP
             return true;
         }
 
-        public bool DeletionPreparation(DataGridViewSelectedRowCollection rows)
-        {
-            deletionIndex = rows[0].Index;
-
-            for (int c = 1; c < rows.Count; c++)
-            {
-                if (rows[c].Index < deletionIndex)
-                {
-                    deletionIndex = rows[c].Index;
-                }
-            }
-
-            foreach (DataGridViewRow row in rows)
-            {
-                if (row.Cells[1].Value.ToString() == current.Cells[1].Value.ToString())
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public int DeletionCompletion(DataGridView playlist)
-        {
-            for (int c = deletionIndex; c < playlist.RowCount; c++)
-            {
-                playlist.Rows[c].Cells[0].Value = c + 1;
-            }
-
-            foreach (DataGridViewRow row in playlist.Rows)
-            {
-                if (row.Cells[1].Value.ToString() == current.Cells[1].Value.ToString())
-                {
-                    return (int)row.Cells[0].Value;
-                }
-            }
-
-            return 0;
-        }
-
-        public bool ToggleAutoplay()
-        {
-            autoplay = !autoplay;
-
-            return autoplay;
-        }
-
         public DataGridViewRow FindVideo(DataGridView playlist, string ID)
         {
             foreach (DataGridViewRow row in playlist.Rows)
@@ -446,7 +390,7 @@ namespace YTMP
             return null;
         }
 
-        public DataGridViewRow FindCurrentVideo(DataGridView playlist)
+        public DataGridViewRow FindCurrentVideo(DataGridView playlist, DataGridViewRow current)
         {
             return FindVideo(playlist, current.Cells[1].Value.ToString());
         }
