@@ -82,11 +82,11 @@ namespace YTMP
 
         public MainForm()
         {
+            framework = new Framework();
+
             InitializeComponent();
 
             InitializeBrowser();
-
-            framework = new Framework(this);
         }
 
         private void InitializeBrowser()
@@ -100,15 +100,10 @@ namespace YTMP
             player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
 
             player.LoadHtml(HTML, "http://HTML/");
-            player.RegisterJsObject("interface", new JavascriptInterface(framework, playlist));
+            player.RegisterJsObject("interface", new JavascriptInterface(this, framework, playlist));
 
             this.Controls.Add(player);
             player.BringToFront();
-        }
-
-        public void ExecuteJavaScript(string javascript)
-        {
-            player.GetMainFrame().ExecuteJavaScriptAsync(javascript);
         }
 
         //Executed when the form is loaded
@@ -150,7 +145,7 @@ namespace YTMP
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            framework.PlayVideo(playlist.SelectedRows[0]);
+            PlayVideo(playlist.SelectedRows[0]);
         }
 
         public void SetFullView(bool state)
@@ -199,9 +194,26 @@ namespace YTMP
             }
         }
 
-        public bool FullViewActive()
+        public void PlayVideo(DataGridViewRow row)
         {
-            return player.Visible;
+            framework.UpdateVideo(row);
+
+            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + row.Cells[1].Value + @""")");
+
+            if (InvokeRequired)
+            {
+                BeginInvoke((MethodInvoker)delegate () {
+                    UpdateVideoDetails(row);
+                });
+            }
+            else
+            {
+                UpdateVideoDetails(row);
+            }
+
+            UpdateUIElements();
+
+            SetFullView(true);
         }
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
@@ -301,19 +313,42 @@ namespace YTMP
             }
         }
 
-        private void exportFileButton_Click(object sender, EventArgs e)
+        private void Export()
         {
-            if (framework.Export(playlist))
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
+                framework.Export(playlist, saveFileDialog.FileName);
+
                 unsaved = false;
             }
         }
 
+        private void exportFileButton_Click(object sender, EventArgs e)
+        {
+            Export();
+        }
+
         private void importFileButton_Click(object sender, EventArgs e)
         {
-            if (framework.Import(playlist, unsaved))
+            if (unsaved)
             {
+                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
+                {
+                    case (DialogResult.Yes):
+                        Export();
+                        break;
+                    case (DialogResult.Cancel):
+                        return;
+                }
+            }
+
+            if (loadFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                framework.Import(playlist, loadFileDialog.FileName);
+
                 SetFullView(false);
+
+                unsaved = false;
             }
         }
 
@@ -329,12 +364,20 @@ namespace YTMP
 
         private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            framework.DeletionPreparation(playlist.SelectedRows);
+            if (framework.DeletionPreparation(playlist.SelectedRows))
+            {
+                UpdateVideoNameTag(0);
+            }
         }
 
         private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
-            framework.DeletionCompletion(playlist);
+            int number = framework.DeletionCompletion(playlist);
+
+            if (player.Visible)
+            {
+                UpdateVideoNameTag(number);
+            }
         }
 
         private void DeleteRow(object sender, EventArgs e)
@@ -346,22 +389,41 @@ namespace YTMP
         {
             if (unsaved)
             {
-                framework.NewPlaylist(playlist);
+                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you make a new one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
+                {
+                    case (DialogResult.Yes):
+                        Export();
+                        break;
+                    case (DialogResult.Cancel):
+                        return;
+                }
             }
-            else
-            {
-                framework.NewPlaylist(null);
-            }
+
+            playlist.Rows.Clear();
+
+            SetFullView(false);
+
+            SetSearchBar(0);
         }
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            framework.Advance(playlist);
+            DataGridViewRow nextVideo = framework.Advance(playlist);
+
+            if (nextVideo != null)
+            {
+                PlayVideo(nextVideo);
+            }
         }
 
         private void previousButton_Click(object sender, EventArgs e)
         {
-            framework.Retreat(playlist);
+            DataGridViewRow previousVideo = framework.Retreat(playlist);
+
+            if (previousVideo != null)
+            {
+                PlayVideo(previousVideo);
+            }
         }
 
         private void autoPlayToggleButton_Click(object sender, EventArgs e)
@@ -381,12 +443,7 @@ namespace YTMP
             framework.FindCurrentVideo(playlist);
         }
 
-        public void ClearPlaylist()
-        {
-            playlist.Rows.Clear();
-        }
-
-        public void UpdateVideoName(string name, int number)
+        private void UpdateVideoName(string name, int number)
         {
             if (number > 0)
             {
@@ -398,7 +455,7 @@ namespace YTMP
             }
         }
 
-        public void UpdateVideoNameTag(int number)
+        private void UpdateVideoNameTag(int number)
         {
             if (number > 0)
             {
@@ -410,33 +467,30 @@ namespace YTMP
             }
         }
 
-        public void UpdateVideoDetails(DataGridViewRow entry)
+        private void UpdateVideoDetails(DataGridViewRow entry)
         {
             videoNameLabel.Text = "[" + (int)entry.Cells[0].Value + "] " + (string)entry.Cells[2].Value;
             videoUploaderLabel.Text = "Uploaded by " + (string)entry.Cells[3].Value;
             videoDescriptionBox.Text = (string)entry.Cells[4].Value;
         }
 
-        public void UpdateUIElements()
+        private void UpdateUIElements()
         {
             videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
             videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
             videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
         }
-
-        public bool VideoInPlaylist()
-        {
-            return !(videoNameLabel.Text.Length == 0 || videoNameLabel.Text.Substring(0, 3) == "[-]");
-        }
     }
 
     public class JavascriptInterface
     {
+        private MainForm form;
         private Framework framework;
         private DataGridView playlist;
 
-        public JavascriptInterface(Framework framework, DataGridView playlist)
+        public JavascriptInterface(MainForm form, Framework framework, DataGridView playlist)
         {
+            this.form = form;
             this.framework = framework;
             this.playlist = playlist;
         }
@@ -445,7 +499,7 @@ namespace YTMP
         {
             if (framework.autoplay)
             {
-                framework.Advance(playlist);
+                form.PlayVideo(framework.Advance(playlist));
             }
         }
     }

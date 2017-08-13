@@ -11,8 +11,6 @@ namespace YTMP
 {
     public class Framework
     {
-        private MainForm form;
-
         //The API key used to access YouTube's servers
         private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
 
@@ -25,9 +23,7 @@ namespace YTMP
         //Tracks the indexes of the playlist entries that users may choose to delete
         private int deletionIndex;
 
-        private int currentRow;
-
-        private string currentID;
+        private DataGridViewRow current;
 
         public bool autoplay = true;
 
@@ -36,11 +32,6 @@ namespace YTMP
         private List<string> shuffleStack = new List<string>();
 
         public bool InvokeRequired { get; private set; }
-
-        public Framework(MainForm form)
-        {
-            this.form = form;
-        }
 
         private Dictionary<String, object> GetDJSON(string ID)
         {
@@ -174,76 +165,46 @@ namespace YTMP
             }
         }
 
-        public bool Export(DataGridView playlist)
+        public void Export(DataGridView playlist, string fileName)
         {
-            if (form.saveFileDialog.ShowDialog() == DialogResult.OK)
+            using (System.IO.StreamWriter SW = new System.IO.StreamWriter(fileName))
             {
-                using (System.IO.StreamWriter SW = new System.IO.StreamWriter(form.saveFileDialog.FileName))
+                int rowCount = playlist.RowCount;
+         
+                for (int i = 0; i < rowCount; i++)
                 {
-                    int rowCount = playlist.RowCount;
-
-                    for (int i = 0; i < rowCount; i++)
+                    if (i < rowCount - 1)
                     {
-                        if (i < rowCount - 1)
-                        {
-                            SW.WriteLine(playlist.Rows[i].Cells[1].Value + " - [" + playlist.Rows[i].Cells[3].Value + "] " + playlist.Rows[i].Cells[2].Value);
-                        }
-                        else
-                        {
-                            SW.Write(playlist.Rows[i].Cells[1].Value + " - [" + playlist.Rows[i].Cells[3].Value + "] " + playlist.Rows[i].Cells[2].Value);
-                        }
+                        SW.WriteLine(playlist.Rows[i].Cells[1].Value + " - [" + playlist.Rows[i].Cells[3].Value + "] " + playlist.Rows[i].Cells[2].Value);
+                    }
+                    else
+                    {
+                        SW.Write(playlist.Rows[i].Cells[1].Value + " - [" + playlist.Rows[i].Cells[3].Value + "] " + playlist.Rows[i].Cells[2].Value);
                     }
                 }
-
-                return true;
-            }
-            else
-            {
-                return false;
             }
         }
 
-        public bool Import(DataGridView playlist, bool export)
+        public void Import(DataGridView playlist, string fileName)
         {
-            if (export)
+            string ID;
+
+            playlist.Rows.Clear();
+
+            using (System.IO.StreamReader SR = new System.IO.StreamReader(fileName))
             {
-                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
+                while ((ID = SR.ReadLine()) != null)
                 {
-                    case (DialogResult.Yes):
-                        Export(playlist);
-                        break;
-                    case (DialogResult.Cancel):
-                        return false;
-                }
-            }
-
-            if (form.loadFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                string ID;
-
-                playlist.Rows.Clear();
-
-                using (System.IO.StreamReader SR = new System.IO.StreamReader(form.loadFileDialog.FileName))
-                {
-                    while ((ID = SR.ReadLine()) != null)
+                    if (ID.Length > 10)
                     {
-                        if (ID.Length > 10)
-                        {
-                            ID = ID.Substring(0, 11);
+                        ID = ID.Substring(0, 11);
 
-                            if (VideoExists(ID))
-                            {
-                                AddVideo(playlist, ID);
-                            }
+                        if (VideoExists(ID))
+                        {
+                            AddVideo(playlist, ID);
                         }
                     }
                 }
-
-                return true;
-            }
-            else
-            {
-                return false;
             }
         }
 
@@ -254,38 +215,31 @@ namespace YTMP
             playlist.Rows.Add(playlist.Rows.Count + 1, ID, details[0], details[1], details[2], details[3]);
         }
 
-        public void PlayVideo(DataGridViewRow entry)
+        public void UpdateVideo(DataGridViewRow entry)
         {
-            currentRow = (int)entry.Cells[0].Value;
-            currentID = (string)entry.Cells[1].Value;
-
-            form.ExecuteJavaScript(@"player.loadVideoById(""" + currentID + @""")");
-
-            if (InvokeRequired)
-            {
-                form.BeginInvoke((MethodInvoker)delegate () {
-                    form.UpdateVideoDetails(entry);
-                });
-            }
-            else
-            {
-                form.UpdateVideoDetails(entry);
-            }
-
-            form.UpdateUIElements();
-
-            form.SetFullView(true);
+            current = entry;
         }
 
-        public void Advance(DataGridView playlist)
+        public DataGridViewRow Advance(DataGridView playlist)
         {
-            if (!NextVideo(playlist, currentID))
+            DataGridViewRow next = NextVideo(playlist, current.Cells[1].Value.ToString());
+
+            if (next != null)
             {
-                NextVideo(playlist, currentRow);
+                return next;
             }
+
+            next = NextVideo(playlist, (int)current.Cells[0].Value - 1);
+
+            if (next != null)
+            {
+                return next;
+            }
+
+            return null;
         }
 
-        public bool NextVideo(DataGridView playlist, string currentID)
+        public DataGridViewRow NextVideo(DataGridView playlist, string currentID)
         {
             if (playlist.RowCount > 0)
             {
@@ -295,53 +249,60 @@ namespace YTMP
                     {
                         if (row.Index < playlist.RowCount - 1)
                         {
-                            PlayVideo(playlist.Rows[row.Index + 1]);
+                            return playlist.Rows[row.Index + 1];
                         }
                         else
                         {
-                            PlayVideo(playlist.Rows[0]);
+                            return playlist.Rows[0];
                         }
-
-                        return true;
                     }
                 }
             }
 
-            return false;
+            return null;
         }
 
-        public bool NextVideo(DataGridView playlist, int currentNumber)
+        public DataGridViewRow NextVideo(DataGridView playlist, int currentIndex)
         {
             if (playlist.RowCount > 0)
             {
-                if (playlist.RowCount < currentNumber)
+                if (playlist.RowCount < currentIndex)
                 {
-                    PlayVideo(playlist.Rows[playlist.RowCount - 1]);
+                    return playlist.Rows[playlist.RowCount - 1];
                 }
-                else if (currentNumber == playlist.RowCount)
+                else if (currentIndex == playlist.RowCount)
                 {
-                    PlayVideo(playlist.Rows[0]);
+                    return playlist.Rows[0];
                 }
                 else
                 {
-                    PlayVideo(playlist.Rows[currentNumber]);
+                    return playlist.Rows[currentIndex];
                 }
-
-                return true;
             }
 
-            return false;
+            return null;
         }
 
-        public void Retreat(DataGridView playlist)
+        public DataGridViewRow Retreat(DataGridView playlist)
         {
-            if (!PreviousVideo(playlist, currentID))
+            DataGridViewRow previous = PreviousVideo(playlist, current.Cells[1].Value.ToString());
+
+            if (previous != null)
             {
-                PreviousVideo(playlist, currentRow);
+                return previous;
             }
+
+            previous = PreviousVideo(playlist, (int)current.Cells[0].Value);
+
+            if (previous != null)
+            {
+                return previous;
+            }
+
+            return null;
         }
 
-        public bool PreviousVideo(DataGridView playlist, string currentID)
+        public DataGridViewRow PreviousVideo(DataGridView playlist, string currentID)
         {
             if (playlist.RowCount > 0)
             {
@@ -351,38 +312,34 @@ namespace YTMP
                     {
                         if (row.Index > 0)
                         {
-                            PlayVideo(playlist.Rows[row.Index - 1]);
+                            return playlist.Rows[row.Index - 1];
                         }
                         else
                         {
-                            PlayVideo(playlist.Rows[playlist.RowCount - 1]);
+                            return playlist.Rows[playlist.RowCount - 1];
                         }
-
-                        return true;
                     }
                 }
             }
 
-            return false;
+            return null;
         }
 
-        public bool PreviousVideo(DataGridView playlist, int currentNumber)
+        public DataGridViewRow PreviousVideo(DataGridView playlist, int currentIndex)
         {
             if (playlist.RowCount > 0)
             {
-                if (playlist.RowCount < currentNumber || currentNumber == 0)
+                if (playlist.RowCount < currentIndex || currentIndex == 0)
                 {
-                    PlayVideo(playlist.Rows[playlist.RowCount - 1]);
+                    return playlist.Rows[playlist.RowCount - 1];
                 }
                 else
                 {
-                    PlayVideo(playlist.Rows[currentNumber - 2]);
+                    return playlist.Rows[currentIndex - 1];
                 }
-
-                return true;
             }
 
-            return false;
+            return null;
         }
 
         public bool Search(DataGridView playlist, string text)
@@ -428,7 +385,7 @@ namespace YTMP
             return true;
         }
 
-        public void DeletionPreparation(DataGridViewSelectedRowCollection rows)
+        public bool DeletionPreparation(DataGridViewSelectedRowCollection rows)
         {
             deletionIndex = rows[0].Index;
 
@@ -442,55 +399,31 @@ namespace YTMP
 
             foreach (DataGridViewRow row in rows)
             {
-                if (row.Cells[1].Value.ToString() == currentID)
+                if (row.Cells[1].Value.ToString() == current.Cells[1].Value.ToString())
                 {
-                    form.UpdateVideoNameTag(0);
-
-                    return;
+                    return true;
                 }
             }
+
+            return false;
         }
 
-        public void DeletionCompletion(DataGridView playlist)
+        public int DeletionCompletion(DataGridView playlist)
         {
             for (int c = deletionIndex; c < playlist.RowCount; c++)
             {
                 playlist.Rows[c].Cells[0].Value = c + 1;
             }
 
-            if (form.FullViewActive() && form.VideoInPlaylist())
+            foreach (DataGridViewRow row in playlist.Rows)
             {
-                foreach (DataGridViewRow row in playlist.Rows)
+                if (row.Cells[1].Value.ToString() == current.Cells[1].Value.ToString())
                 {
-                    if (row.Cells[1].Value.ToString() == currentID)
-                    {
-                        form.UpdateVideoNameTag((int)row.Cells[0].Value);
-
-                        return;
-                    }
-                }
-            }
-        }
-
-        public void NewPlaylist(DataGridView playlist)
-        {
-            if (playlist != null)
-            {
-                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you make a new one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
-                {
-                    case (DialogResult.Yes):
-                        Export(playlist);
-                        break;
-                    case (DialogResult.Cancel):
-                        return;
+                    return (int)row.Cells[0].Value;
                 }
             }
 
-            form.ClearPlaylist();
-
-            form.SetFullView(false);
-
-            form.SetSearchBar(0);
+            return 0;
         }
 
         public bool ToggleAutoplay()
@@ -515,7 +448,7 @@ namespace YTMP
 
         public DataGridViewRow FindCurrentVideo(DataGridView playlist)
         {
-            return FindVideo(playlist, currentID);
+            return FindVideo(playlist, current.Cells[1].Value.ToString());
         }
     }
 }
