@@ -417,8 +417,6 @@
         private System.Windows.Forms.ToolStripMenuItem AboutButton;
         private System.Windows.Forms.ToolStripMenuItem minMaxToggleButton;
         private System.Windows.Forms.Label videoNameLabel;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog;
-        private System.Windows.Forms.OpenFileDialog loadFileDialog;
         private System.Windows.Forms.ToolStripMenuItem newPlaylistButton;
         private System.Windows.Forms.ToolStripSeparator playlistOptionsSeparatorA;
         private System.Windows.Forms.Label videoUploaderLabel;
@@ -432,6 +430,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn length;
         private System.Windows.Forms.Button nextButton;
         private System.ComponentModel.BackgroundWorker backgroundWorker;
+        public System.Windows.Forms.SaveFileDialog saveFileDialog;
+        public System.Windows.Forms.OpenFileDialog loadFileDialog;
     }
 }
 

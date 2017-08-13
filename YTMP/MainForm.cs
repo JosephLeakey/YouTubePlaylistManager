@@ -21,8 +21,9 @@ namespace YTMP
     [System.Runtime.InteropServices.ComVisible(true)]
     public partial class MainForm : System.Windows.Forms.Form
     {
-        //The API key used to access YouTube's servers
-        private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
+        private Program program;
+
+        private ChromiumWebBrowser player;
 
         private const string HTML = @"<meta http-equiv=""X-UA-Compatible"" content=""IE=edge""/>
  <html>
@@ -70,38 +71,19 @@ namespace YTMP
   </body>
 </html>";
 
-        private ChromiumWebBrowser player;
-
-        //Enables the program to download JSON files from YouTube's servers
-        private WebClient WC = new WebClient();
-
-        //De-serializes JSON files into dictionaries
-        private JavaScriptSerializer serializer = new JavaScriptSerializer();
-
         //The menu that will be displayed when a row in the playlist is right-clicked on
         private ContextMenu menu = new ContextMenu();
-
-        //Tracks whether or not changes have been made to the current playlist since it was previously exported/imported
-        private bool unsaved = false;
 
         //The text to be displayed in the searchbar when it's inactive
         private const string searchBoxText = "Search through the playlist or add a video to it...";
 
-        //Tracks the indexes of the playlist entries that users may choose to delete
-        private int deletionIndex;
+        //Tracks whether or not changes have been made to the current playlist since it was previously exported/imported
+        private bool unsaved = false;
 
-        private int currentRow;
-
-        private string currentID;
-
-        public bool autoplay = true;
-
-        public bool shuffle = false;
-
-        private List<string> shuffleStack = new List<string>();
-
-        public MainForm()
+        public MainForm(Program program)
         {
+            this.program = program;
+
             InitializeComponent();
 
             InitializeBrowser();
@@ -118,10 +100,15 @@ namespace YTMP
             player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
 
             player.LoadHtml(HTML, "http://HTML/");
-            player.RegisterJsObject("interface", new JavascriptInterface(this));
+            player.RegisterJsObject("interface", new JavascriptInterface(program, playlist.Rows));
 
             this.Controls.Add(player);
             player.BringToFront();
+        }
+
+        public void ExecuteJavaScript(string javascript)
+        {
+            player.GetMainFrame().ExecuteJavaScriptAsync(javascript);
         }
 
         //Executed when the form is loaded
@@ -135,301 +122,38 @@ namespace YTMP
             SetFullView(false);
         }
 
-        private Dictionary<String, object> GetDJSON(string ID)
+        public void SetSearchBar(int mode)
         {
-            using (WC)
+            switch (mode)
             {
-                try
-                {
-                    string JSON = WC.DownloadString("https://www.googleapis.com/youtube/v3/videos?key=AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0&part=snippet,contentDetails&id=" + ID);
+                default:
+                case (0):
+                    addButton.Visible = false;
+                    searchBox.Size = new Size(playlist.Size.Width, searchBox.Size.Height);
 
-                    return serializer.Deserialize<Dictionary<String, object>>(JSON);
-                }
-                catch (WebException WE)
-                {
-                    return null;
-                }
+                    searchBox.ForeColor = SystemColors.ControlDark;
+                    searchBox.Font = new Font(searchBox.Font, FontStyle.Italic);
+                    searchBox.Text = searchBoxText;
+
+                    playlist.Focus();
+                    break;
+                case (1):
+                    addButton.Visible = false;
+                    searchBox.Size = new Size(playlist.Size.Width, searchBox.Size.Height);
+                    break;
+                case (2):
+                    searchBox.Size = new Size(playlist.Size.Width - 104, searchBox.Size.Height);
+                    addButton.Visible = true;
+                    break;
             }
-        }
-
-        private string[] GetVideoDetails(Dictionary<String, object> DJSON)
-        {
-            string[] details = new string[4];
-
-            string time = "";
-
-            dynamic partial;
-
-            Dictionary<String, object> auxiliary;
-
-            partial = (ArrayList)DJSON["items"];
-            partial = partial[0];
-
-            auxiliary = partial["contentDetails"];
-
-            partial = (Dictionary<String, object>)partial["snippet"];
-
-            details[0] = (string)partial["title"];
-            details[1] = (string)partial["channelTitle"];
-            details[2] = (string)partial["description"];
-            details[2] = details[2].Replace("\n", "\r\n");
-
-            details[3] = (string)auxiliary["duration"];
-            details[3] = details[3].Substring(1).ToLower();
-
-            if (details[3].Contains("d"))
-            {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("d")))) + " : ";
-            }
-
-            details[3] = details[3].Substring(details[3].IndexOf("t") + 1);
-
-            if (details[3].Contains("h"))
-            {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("h")))) + " : ";
-
-                details[3] = details[3].Substring(details[3].IndexOf("h") + 1);
-            }
-
-            if (details[3].Contains("m"))
-            {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("m")))) + " : ";
-
-                details[3] = details[3].Substring(details[3].IndexOf("m") + 1);
-            }
-            else
-            {
-                time += "00 : ";
-            }
-
-            if (details[3].Contains("s"))
-            {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("s"))));
-            }
-            else
-            {
-                time += "00";
-            }
-
-            details[3] = time;
-
-            return details;
-        }
-
-        private string[] GetVideoDetails(string ID)
-        {
-            return GetVideoDetails(GetDJSON(ID));
-        }
-
-        private object[] GetPlaylistEntryDetails(int index)
-        {
-            if (index >= 0 && index < playlist.RowCount)
-            {
-                return new object[] { playlist.Rows[index].Cells[0].Value,
-                    playlist.Rows[index].Cells[1].Value,
-                    playlist.Rows[index].Cells[2].Value,
-                    playlist.Rows[index].Cells[3].Value,
-                    playlist.Rows[index].Cells[4].Value };
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        private int EntryExists(string ID)
-        {
-            foreach (DataGridViewRow row in playlist.Rows)
-            {
-                if (row.Cells[1].Value.ToString().ToLower() == ID.ToLower())
-                {
-                    return row.Index;
-                }
-            }
-
-            return -1;
-        }
-
-        private bool VideoExists(string ID)
-        {
-            using (WC)
-            {
-                try
-                {
-                    string JSON = WC.DownloadString("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + ID);
-
-                    return true;
-                }
-                catch (WebException WE)
-                {
-                    return false;
-                }
-            }
-        }
-
-        private void Export()
-        {
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                using (System.IO.StreamWriter SW = new System.IO.StreamWriter(saveFileDialog.FileName))
-                {
-                    for (int i = 0; i < playlist.RowCount; i++)
-                    {
-                        if (i < playlist.RowCount - 1)
-                        {
-                            SW.WriteLine(playlist.Rows[i].Cells[1].Value.ToString() + " - [" + playlist.Rows[i].Cells[3].Value.ToString() + "] " + playlist.Rows[i].Cells[2].Value.ToString());
-                        }
-                        else
-                        {
-                            SW.Write(playlist.Rows[i].Cells[1].Value.ToString() + " - [" + playlist.Rows[i].Cells[3].Value.ToString() + "] " + playlist.Rows[i].Cells[2].Value.ToString());
-                        }
-                    }
-                }
-
-                unsaved = false;
-            }
-        }
-
-        private void Import()
-        {
-            if (loadFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                string ID;
-
-                playlist.Rows.Clear();
-
-                SetFullView(false);
-
-                using (System.IO.StreamReader SR = new System.IO.StreamReader(loadFileDialog.FileName))
-                {
-                    while ((ID = SR.ReadLine()) != null)
-                    {
-                        if (ID.Length > 10)
-                        {
-                            ID = ID.Substring(0, 11);
-
-                            if (VideoExists(ID))
-                            {
-                                string[] videoDetails = GetVideoDetails(ID);
-
-                                playlist.Rows.Add(playlist.RowCount + 1, ID, videoDetails[0], videoDetails[1], videoDetails[2], videoDetails[3]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private void ResetSearchBar()
-        {
-            searchBox.ForeColor = SystemColors.ControlDark;
-            searchBox.Font = new Font(searchBox.Font, FontStyle.Italic);
-            searchBox.Text = searchBoxText;
-
-            playlist.Focus();
         }
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            PlayVideo(playlist.SelectedRows[0].Index);
+            program.PlayVideo(playlist.SelectedRows[0]);
         }
 
-        private void PlayVideo(int rowIndex)
-        {
-            object[] details = GetPlaylistEntryDetails(rowIndex);
-
-            currentRow = (int)details[0];
-            currentID = (string)details[1];
-
-            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + currentID + @""")");
-
-            if (InvokeRequired)
-            {
-                BeginInvoke((MethodInvoker)delegate () {
-                    videoNameLabel.Text = "[" + (int)details[0] + "] " + (string)details[2];
-                    videoUploaderLabel.Text = "Uploaded by " + (string)details[3];
-                    videoDescriptionBox.Text = (string)details[4];
-                });
-            }
-            else
-            {
-                videoNameLabel.Text = "[" + (int)details[0] + "] " + (string)details[2];
-                videoUploaderLabel.Text = "Uploaded by " + (string)details[3];
-                videoDescriptionBox.Text = (string)details[4];
-            }
-
-            videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
-            videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
-            videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
-
-            SetFullView(true);
-        }
-
-        public void NextVideo()
-        {
-            if (playlist.RowCount > 0)
-            {
-                foreach (DataGridViewRow row in playlist.Rows)
-                {
-                    if (row.Cells[1].Value.ToString() == currentID)
-                    {
-                        if (row.Index < playlist.RowCount - 1)
-                        {
-                            PlayVideo(row.Index + 1);
-                        }
-                        else
-                        {
-                            PlayVideo(0);
-                        }
-
-                        return;
-                    }
-                }
-
-                if (playlist.RowCount < currentRow)
-                {
-                    PlayVideo(playlist.RowCount - 1);
-                }
-                else
-                {
-                    PlayVideo(currentRow - 1);
-                }
-            }
-        }
-
-        public void PreviousVideo()
-        {
-            if (playlist.RowCount > 0)
-            {
-                foreach (DataGridViewRow row in playlist.Rows)
-                {
-                    if (row.Cells[1].Value.ToString() == currentID)
-                    {
-                        if (row.Index > 0)
-                        {
-                            PlayVideo(row.Index - 1);
-                        }
-                        else
-                        {
-                            PlayVideo(playlist.RowCount - 1);
-                        }
-
-                        return;
-                    }
-                }
-
-                if (currentRow == 1 || playlist.RowCount < currentRow)
-                {
-                    PlayVideo(playlist.RowCount - 1);
-                }
-                else
-                {
-                    PlayVideo(currentRow - 2);
-                }
-            }
-        }
-
-        private void SetFullView(bool state)
+        public void SetFullView(bool state)
         {
             if (state && this.MinimumSize.Width < 1280)
             {
@@ -475,12 +199,16 @@ namespace YTMP
             }
         }
 
+        public bool FullViewActive()
+        {
+            return player.Visible;
+        }
+
         private void SearchBox_TextChanged(object sender, EventArgs e)
         {
             if (addButton.Visible)
             {
-                addButton.Visible = false;
-                searchBox.Size = new Size(playlist.Size.Width, searchBox.Size.Height);
+                SetSearchBar(1);
             }
 
             if (searchBox.Text.Length == 0 || searchBox.ForeColor == SystemColors.ControlDark)
@@ -493,59 +221,21 @@ namespace YTMP
                 return;
             }
 
-            int row = -1;
-
-            if (searchBox.Text.Length > 10)
+            if (program.Search(playlist.Rows, searchBox.Text))
             {
-                row = EntryExists(searchBox.Text.Substring(searchBox.Text.Length - 11));
-
-                if (row == -1 && VideoExists(searchBox.Text.Substring(searchBox.Text.Length - 11)))
-                {
-                    searchBox.Size = new Size(playlist.Size.Width - 104, searchBox.Size.Height);
-                    addButton.Visible = true;
-
-                    foreach (DataGridViewRow entry in playlist.Rows)
-                    {
-                        entry.Visible = true;
-                    }
-
-                    return;
-                }
+                playlist.ClearSelection();
             }
-
-            playlist.ClearSelection();
-
-            foreach (DataGridViewRow entry in playlist.Rows)
+            else
             {
-                if (entry.Index != row)
-                {
-                    entry.Visible = false;
-                }
-            }
-
-            for (int c = 0; c < playlist.RowCount; c++)
-            {
-                for (int d = 0; d < playlist.ColumnCount - 2; d++)
-                {
-                    if (d != 1 && playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(searchBox.Text.ToLower()))
-                    {
-                        playlist.Rows[c].Visible = true;
-
-                        break;
-                    }
-                }
+                SetSearchBar(2);
             }
         }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            string ID = (searchBox.Text.Substring(searchBox.Text.Length - 11));
+            program.AddVideo(playlist.Rows, searchBox.Text.Substring(searchBox.Text.Length - 11));
 
-            string[] videoDetails = GetVideoDetails(ID);
-
-            playlist.Rows.Add(playlist.RowCount + 1, ID, videoDetails[0], videoDetails[1], videoDetails[2], videoDetails[3]);
-
-            ResetSearchBar();
+            SetSearchBar(0);
 
             unsaved = true;
         }
@@ -584,7 +274,7 @@ namespace YTMP
 
                 playlistOptionsButton.Visible = true;
 
-                if (VideoExists(searchBox.Text.Substring(searchBox.Text.Length - 11)))
+                if (searchBox.Width < playlist.Width)
                 {
                     addButton.Visible = true;
                 }
@@ -607,30 +297,39 @@ namespace YTMP
         {
             if (searchBox.TextLength == 0)
             {
-                ResetSearchBar();
+                SetSearchBar(0);
             }
         }
 
         private void exportFileButton_Click(object sender, EventArgs e)
         {
-            Export();
+            if (program.Export(playlist.Rows))
+            {
+                unsaved = false;
+            }
         }
 
         private void importFileButton_Click(object sender, EventArgs e)
         {
+            DataGridViewRowCollection import;
+
             if (unsaved)
             {
-                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
-                {
-                    case (DialogResult.Yes):
-                        Export();
-                        break;
-                    case (DialogResult.Cancel):
-                        return;
-                }
+                import = program.Import(this.playlist.Rows);
+            }
+            else
+            {
+                import = program.Import(null);
             }
 
-            Import();
+            if (import != null)
+            {
+                playlist.Rows.Clear();
+
+                SetFullView(false);
+
+                playlist.Rows.Add(import);
+            }
         }
 
         private void playlist_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -645,50 +344,12 @@ namespace YTMP
 
         private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            deletionIndex = playlist.SelectedRows[0].Index;
-
-            for (int c = 1; c < playlist.SelectedRows.Count; c++)
-            {
-                if (playlist.SelectedRows[c].Index < deletionIndex)
-                {
-                    deletionIndex = playlist.SelectedRows[c].Index;
-                }
-            }
-
-            foreach (DataGridViewRow row in playlist.SelectedRows)
-            {
-                if (row.Cells[1].Value.ToString() == currentID)
-                {
-                    videoNameLabel.Text = "[-] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
-
-                    return;
-                }
-            }
+            program.DeletionPreparation(playlist.SelectedRows);
         }
 
         private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
-            for (int c = deletionIndex; c < playlist.RowCount; c++)
-            {
-                playlist.Rows[c].Cells[0].Value = playlist.Rows[c].Index + 1;
-            }
-
-            if (player.Visible && videoNameLabel.Text.Substring(0, 3) != "[-]")
-            {
-                foreach (DataGridViewRow row in playlist.Rows)
-                {
-                    if (row.Cells[1].Value.ToString() == currentID)
-                    {
-                        currentRow = (int)row.Cells[0].Value;
-
-                        videoNameLabel.Text = "[" + currentRow + "] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
-
-                        return;
-                    }
-                }
-            }
-
-            unsaved = true;
+            program.DeletionCompletion(playlist.Rows);
         }
 
         private void DeleteRow(object sender, EventArgs e)
@@ -700,40 +361,27 @@ namespace YTMP
         {
             if (unsaved)
             {
-                switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you make a new one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
-                {
-                    case (DialogResult.Yes):
-                        Export();
-                        break;
-                    case (DialogResult.Cancel):
-                        return;
-                }
+                program.NewPlaylist(playlist.Rows);
             }
-
-            playlist.Rows.Clear();
-
-            SetFullView(false);
-
-            ResetSearchBar();
-
-            unsaved = false;
+            else
+            {
+                program.NewPlaylist(null);
+            }
         }
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            NextVideo();
+            program.Advance(playlist.Rows);
         }
 
         private void previousButton_Click(object sender, EventArgs e)
         {
-            PreviousVideo();
+            program.Retreat(playlist.Rows);
         }
 
         private void autoPlayToggleButton_Click(object sender, EventArgs e)
         {
-            autoplay = !autoplay;
-
-            if (autoplay)
+            if (program.ToggleAutoplay())
             {
                 autoPlayToggleButton.Text = "Auto-Play: ON";
             }
@@ -745,34 +393,74 @@ namespace YTMP
 
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
-            foreach (DataGridViewRow row in playlist.Rows)
+            program.FindCurrentVideo(playlist.Rows);
+        }
+
+        public void ClearPlaylist()
+        {
+            playlist.Rows.Clear();
+        }
+
+        public void UpdateVideoName(string name, int number)
+        {
+            if (number > 0)
             {
-                if (row.Cells[1].Value.ToString() == currentID)
-                {
-                    playlist.ClearSelection();
-
-                    row.Selected = true;
-
-                    break;
-                }
+                videoNameLabel.Text = "[" + number + "] " + name;
             }
+            else
+            {
+                videoNameLabel.Text = "[-] " + name;
+            }
+        }
+
+        public void UpdateVideoNameTag(int number)
+        {
+            if (number > 0)
+            {
+                videoNameLabel.Text = "[" + number + "] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
+            }
+            else
+            {
+                videoNameLabel.Text = "[-] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
+            }
+        }
+
+        public void UpdateVideoDetails(DataGridViewRow entry)
+        {
+            videoNameLabel.Text = "[" + (int)entry.Cells[0].Value + "] " + (string)entry.Cells[2].Value;
+            videoUploaderLabel.Text = "Uploaded by " + (string)entry.Cells[3].Value;
+            videoDescriptionBox.Text = (string)entry.Cells[4].Value;
+        }
+
+        public void UpdateUIElements()
+        {
+            videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
+            videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
+            videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
+        }
+
+        public bool VideoInPlaylist()
+        {
+            return !(videoNameLabel.Text.Length == 0 || videoNameLabel.Text.Substring(0, 3) == "[-]");
         }
     }
 
     public class JavascriptInterface
     {
-        private MainForm form;
+        private Program program;
+        private DataGridViewRowCollection playlist;
 
-        public JavascriptInterface(MainForm form)
+        public JavascriptInterface(Program program, DataGridViewRowCollection playlist)
         {
-            this.form = form;
+            this.program = program;
+            this.playlist = playlist;
         }
 
         public void NextVideo()
         {
-            if (form.autoplay)
+            if (program.autoplay)
             {
-                form.NextVideo();
+                program.Advance(playlist);
             }
         }
     }
