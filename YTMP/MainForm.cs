@@ -13,6 +13,7 @@ using System.Collections;
 using CefSharp;
 using CefSharp.WinForms;
 using System.Security.Permissions;
+using System.Threading;
 
 namespace YTMP
 {
@@ -62,7 +63,7 @@ namespace YTMP
 
       function onPlayerStateChange(event) {
         if (event.data == YT.PlayerState.ENDED) {
-            window.nextVideo();
+            interface.nextVideo();
         }
       }
     </script>
@@ -93,6 +94,12 @@ namespace YTMP
 
         private string currentID;
 
+        public bool autoplay = true;
+
+        public bool shuffle = false;
+
+        private List<string> shuffleStack = new List<string>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -100,7 +107,7 @@ namespace YTMP
             InitializeBrowser();
         }
 
-        public void InitializeBrowser()
+        private void InitializeBrowser()
         {
             Cef.Initialize(new CefSettings());
 
@@ -111,7 +118,7 @@ namespace YTMP
             player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
 
             player.LoadHtml(HTML, "http://HTML/");
-            player.RegisterJsObject("nextVideo", NextVideo());
+            player.RegisterJsObject("interface", new JavascriptInterface(this));
 
             this.Controls.Add(player);
             player.BringToFront();
@@ -214,6 +221,22 @@ namespace YTMP
             return GetVideoDetails(GetDJSON(ID));
         }
 
+        private object[] GetPlaylistEntryDetails(int index)
+        {
+            if (index >= 0 && index < playlist.RowCount)
+            {
+                return new object[] { playlist.Rows[index].Cells[0].Value,
+                    playlist.Rows[index].Cells[1].Value,
+                    playlist.Rows[index].Cells[2].Value,
+                    playlist.Rows[index].Cells[3].Value,
+                    playlist.Rows[index].Cells[4].Value };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         private int EntryExists(string ID)
         {
             foreach (DataGridViewRow row in playlist.Rows)
@@ -313,22 +336,36 @@ namespace YTMP
 
         private void PlayVideo(int rowIndex)
         {
-            currentRow = (int)playlist.Rows[rowIndex].Cells[0].Value;
-            currentID = playlist.Rows[rowIndex].Cells[1].Value.ToString();
+            object[] details = GetPlaylistEntryDetails(rowIndex);
+
+            currentRow = (int)details[0];
+            currentID = (string)details[1];
 
             player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + currentID + @""")");
 
-            videoNameLabel.Text = playlist.Rows[rowIndex].Cells[2].Value.ToString();
-            videoUploaderLabel.Text = "Uploaded by " + playlist.Rows[rowIndex].Cells[3].Value.ToString();
+            if (InvokeRequired)
+            {
+                BeginInvoke((MethodInvoker)delegate () {
+                    videoNameLabel.Text = "[" + (int)details[0] + "] " + (string)details[2];
+                    videoUploaderLabel.Text = "Uploaded by " + (string)details[3];
+                    videoDescriptionBox.Text = (string)details[4];
+                });
+            }
+            else
+            {
+                videoNameLabel.Text = "[" + (int)details[0] + "] " + (string)details[2];
+                videoUploaderLabel.Text = "Uploaded by " + (string)details[3];
+                videoDescriptionBox.Text = (string)details[4];
+            }
+
             videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
-            videoDescriptionBox.Text = playlist.Rows[rowIndex].Cells[4].Value.ToString();
             videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
             videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
 
             SetFullView(true);
         }
 
-        private object NextVideo()
+        public void NextVideo()
         {
             if (playlist.RowCount > 0)
             {
@@ -345,20 +382,51 @@ namespace YTMP
                             PlayVideo(0);
                         }
 
-                        return null;
+                        return;
                     }
                 }
 
                 if (playlist.RowCount < currentRow)
                 {
                     PlayVideo(playlist.RowCount - 1);
-                } else
+                }
+                else
                 {
-                    PlayVideo(currentRow);
+                    PlayVideo(currentRow - 1);
                 }
             }
+        }
 
-            return null;
+        public void PreviousVideo()
+        {
+            if (playlist.RowCount > 0)
+            {
+                foreach (DataGridViewRow row in playlist.Rows)
+                {
+                    if (row.Cells[1].Value.ToString() == currentID)
+                    {
+                        if (row.Index > 0)
+                        {
+                            PlayVideo(row.Index - 1);
+                        }
+                        else
+                        {
+                            PlayVideo(playlist.RowCount - 1);
+                        }
+
+                        return;
+                    }
+                }
+
+                if (currentRow == 1 || playlist.RowCount < currentRow)
+                {
+                    PlayVideo(playlist.RowCount - 1);
+                }
+                else
+                {
+                    PlayVideo(currentRow - 2);
+                }
+            }
         }
 
         private void SetFullView(bool state)
@@ -444,6 +512,8 @@ namespace YTMP
                     return;
                 }
             }
+
+            playlist.ClearSelection();
 
             foreach (DataGridViewRow entry in playlist.Rows)
             {
@@ -584,6 +654,16 @@ namespace YTMP
                     deletionIndex = playlist.SelectedRows[c].Index;
                 }
             }
+
+            foreach (DataGridViewRow row in playlist.SelectedRows)
+            {
+                if (row.Cells[1].Value.ToString() == currentID)
+                {
+                    videoNameLabel.Text = "[-] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
+
+                    return;
+                }
+            }
         }
 
         private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
@@ -591,6 +671,21 @@ namespace YTMP
             for (int c = deletionIndex; c < playlist.RowCount; c++)
             {
                 playlist.Rows[c].Cells[0].Value = playlist.Rows[c].Index + 1;
+            }
+
+            if (player.Visible && videoNameLabel.Text.Substring(0, 3) != "[-]")
+            {
+                foreach (DataGridViewRow row in playlist.Rows)
+                {
+                    if (row.Cells[1].Value.ToString() == currentID)
+                    {
+                        currentRow = (int)row.Cells[0].Value;
+
+                        videoNameLabel.Text = "[" + currentRow + "] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
+
+                        return;
+                    }
+                }
             }
 
             unsaved = true;
@@ -622,6 +717,63 @@ namespace YTMP
             ResetSearchBar();
 
             unsaved = false;
+        }
+
+        private void nextButton_Click(object sender, EventArgs e)
+        {
+            NextVideo();
+        }
+
+        private void previousButton_Click(object sender, EventArgs e)
+        {
+            PreviousVideo();
+        }
+
+        private void autoPlayToggleButton_Click(object sender, EventArgs e)
+        {
+            autoplay = !autoplay;
+
+            if (autoplay)
+            {
+                autoPlayToggleButton.Text = "Auto-Play: ON";
+            }
+            else
+            {
+                autoPlayToggleButton.Text = "Auto-Play: OFF";
+            }
+        }
+
+        private void videoNameLabel_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in playlist.Rows)
+            {
+                if (row.Cells[1].Value.ToString() == currentID)
+                {
+                    playlist.ClearSelection();
+
+                    row.Selected = true;
+
+                    break;
+                }
+            }
+        }
+    }
+
+    public class JavascriptInterface
+    {
+        private MainForm form;
+
+        public JavascriptInterface(MainForm form)
+        {
+            this.form = form;
+        }
+
+        public void NextVideo()
+        {
+            if (form.autoplay)
+            {
+                form.NextVideo();
+            }
         }
     }
 }

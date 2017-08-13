@@ -60,7 +60,7 @@
             this.videoDescriptionBox = new System.Windows.Forms.TextBox();
             this.previousButton = new System.Windows.Forms.Button();
             this.nextButton = new System.Windows.Forms.Button();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.playlist)).BeginInit();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -213,12 +213,13 @@
             this.autoPlayToggleButton.Name = "autoPlayToggleButton";
             this.autoPlayToggleButton.Size = new System.Drawing.Size(96, 20);
             this.autoPlayToggleButton.Text = "Auto-Play: ON";
+            this.autoPlayToggleButton.Click += new System.EventHandler(this.autoPlayToggleButton_Click);
             // 
             // shuffleToggleButton
             // 
             this.shuffleToggleButton.Name = "shuffleToggleButton";
-            this.shuffleToggleButton.Size = new System.Drawing.Size(80, 20);
-            this.shuffleToggleButton.Text = "Shuffle: ON";
+            this.shuffleToggleButton.Size = new System.Drawing.Size(83, 20);
+            this.shuffleToggleButton.Text = "Shuffle: OFF";
             // 
             // helpButton
             // 
@@ -301,6 +302,7 @@
             this.videoNameLabel.Size = new System.Drawing.Size(0, 37);
             this.videoNameLabel.TabIndex = 9;
             this.videoNameLabel.Visible = false;
+            this.videoNameLabel.Click += new System.EventHandler(this.videoNameLabel_Click);
             // 
             // saveFileDialog
             // 
@@ -352,6 +354,7 @@
             this.previousButton.Text = "◀  Previous Video";
             this.previousButton.UseVisualStyleBackColor = true;
             this.previousButton.Visible = false;
+            this.previousButton.Click += new System.EventHandler(this.previousButton_Click);
             // 
             // nextButton
             // 
@@ -365,6 +368,7 @@
             this.nextButton.Text = "Next Video  ▶";
             this.nextButton.UseVisualStyleBackColor = true;
             this.nextButton.Visible = false;
+            this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
             // 
             // MainForm
             // 
@@ -427,7 +431,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn description;
         private System.Windows.Forms.DataGridViewTextBoxColumn length;
         private System.Windows.Forms.Button nextButton;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker;
     }
 }
 
