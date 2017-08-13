@@ -21,7 +21,7 @@ namespace YTMP
     [System.Runtime.InteropServices.ComVisible(true)]
     public partial class MainForm : System.Windows.Forms.Form
     {
-        private Program program;
+        private Framework framework;
 
         private ChromiumWebBrowser player;
 
@@ -80,13 +80,13 @@ namespace YTMP
         //Tracks whether or not changes have been made to the current playlist since it was previously exported/imported
         private bool unsaved = false;
 
-        public MainForm(Program program)
+        public MainForm()
         {
-            this.program = program;
-
             InitializeComponent();
 
             InitializeBrowser();
+
+            framework = new Framework(this);
         }
 
         private void InitializeBrowser()
@@ -100,7 +100,7 @@ namespace YTMP
             player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
 
             player.LoadHtml(HTML, "http://HTML/");
-            player.RegisterJsObject("interface", new JavascriptInterface(program, playlist.Rows));
+            player.RegisterJsObject("interface", new JavascriptInterface(framework, playlist));
 
             this.Controls.Add(player);
             player.BringToFront();
@@ -150,7 +150,7 @@ namespace YTMP
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            program.PlayVideo(playlist.SelectedRows[0]);
+            framework.PlayVideo(playlist.SelectedRows[0]);
         }
 
         public void SetFullView(bool state)
@@ -221,7 +221,7 @@ namespace YTMP
                 return;
             }
 
-            if (program.Search(playlist.Rows, searchBox.Text))
+            if (framework.Search(playlist, searchBox.Text))
             {
                 playlist.ClearSelection();
             }
@@ -233,7 +233,7 @@ namespace YTMP
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            program.AddVideo(playlist.Rows, searchBox.Text.Substring(searchBox.Text.Length - 11));
+            framework.AddVideo(playlist, searchBox.Text.Substring(searchBox.Text.Length - 11));
 
             SetSearchBar(0);
 
@@ -303,7 +303,7 @@ namespace YTMP
 
         private void exportFileButton_Click(object sender, EventArgs e)
         {
-            if (program.Export(playlist.Rows))
+            if (framework.Export(playlist))
             {
                 unsaved = false;
             }
@@ -311,24 +311,9 @@ namespace YTMP
 
         private void importFileButton_Click(object sender, EventArgs e)
         {
-            DataGridViewRowCollection import;
-
-            if (unsaved)
+            if (framework.Import(playlist, unsaved))
             {
-                import = program.Import(this.playlist.Rows);
-            }
-            else
-            {
-                import = program.Import(null);
-            }
-
-            if (import != null)
-            {
-                playlist.Rows.Clear();
-
                 SetFullView(false);
-
-                playlist.Rows.Add(import);
             }
         }
 
@@ -344,12 +329,12 @@ namespace YTMP
 
         private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            program.DeletionPreparation(playlist.SelectedRows);
+            framework.DeletionPreparation(playlist.SelectedRows);
         }
 
         private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
-            program.DeletionCompletion(playlist.Rows);
+            framework.DeletionCompletion(playlist);
         }
 
         private void DeleteRow(object sender, EventArgs e)
@@ -361,27 +346,27 @@ namespace YTMP
         {
             if (unsaved)
             {
-                program.NewPlaylist(playlist.Rows);
+                framework.NewPlaylist(playlist);
             }
             else
             {
-                program.NewPlaylist(null);
+                framework.NewPlaylist(null);
             }
         }
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            program.Advance(playlist.Rows);
+            framework.Advance(playlist);
         }
 
         private void previousButton_Click(object sender, EventArgs e)
         {
-            program.Retreat(playlist.Rows);
+            framework.Retreat(playlist);
         }
 
         private void autoPlayToggleButton_Click(object sender, EventArgs e)
         {
-            if (program.ToggleAutoplay())
+            if (framework.ToggleAutoplay())
             {
                 autoPlayToggleButton.Text = "Auto-Play: ON";
             }
@@ -393,7 +378,7 @@ namespace YTMP
 
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
-            program.FindCurrentVideo(playlist.Rows);
+            framework.FindCurrentVideo(playlist);
         }
 
         public void ClearPlaylist()
@@ -447,20 +432,20 @@ namespace YTMP
 
     public class JavascriptInterface
     {
-        private Program program;
-        private DataGridViewRowCollection playlist;
+        private Framework framework;
+        private DataGridView playlist;
 
-        public JavascriptInterface(Program program, DataGridViewRowCollection playlist)
+        public JavascriptInterface(Framework framework, DataGridView playlist)
         {
-            this.program = program;
+            this.framework = framework;
             this.playlist = playlist;
         }
 
         public void NextVideo()
         {
-            if (program.autoplay)
+            if (framework.autoplay)
             {
-                program.Advance(playlist);
+                framework.Advance(playlist);
             }
         }
     }
