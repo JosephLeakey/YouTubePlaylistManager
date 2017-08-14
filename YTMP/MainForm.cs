@@ -158,16 +158,7 @@ namespace YTMP
 
             unsaved = false;
 
-            string search = GetSearchText();
-
-            if (search.Length < 11 || !framework.ReadyToAdd(playlist, search.Substring(search.Length - 11)))
-            {
-                SetSearchBar(0);
-            }
-            else
-            {
-                SetSearchBar(2);
-            }
+            Search();
         }
 
         private string GetSearchText()
@@ -259,7 +250,7 @@ namespace YTMP
             SetFullView(true);
         }
 
-        private void SearchBox_TextChanged(object sender, EventArgs e)
+        private void Search()
         {
             string search = GetSearchText();
 
@@ -269,22 +260,24 @@ namespace YTMP
 
                 search = string.Empty;
             }
-            else if (searchBox.ForeColor != SystemColors.ControlDark)
+            else if (searchBox.ForeColor == SystemColors.ControlDark)
+            {
+                search = string.Empty;
+            }
+            else
             {
                 SetSearchBar(1);
             }
 
-            if (search.Length == 0 || searchBox.ForeColor == SystemColors.ControlDark)
+            if (framework.Search(playlist, search) < playlist.RowCount)
             {
-                foreach (DataGridViewRow row in playlist.Rows)
-                {
-                    row.Visible = true;
-                }
-
-                return;
+                playlist.ClearSelection();
             }
+        }
 
-            framework.Search(playlist, search);
+        private void SearchBox_TextChanged(object sender, EventArgs e)
+        {
+            Search();
         }
 
         private void AddButton_Click(object sender, EventArgs e)
@@ -400,8 +393,6 @@ namespace YTMP
         {
             if (e.Button == MouseButtons.Right)
             {
-                playlist.ClearSelection();
-
                 playlist.Rows[e.RowIndex].Selected = true;
 
                 menu.Show(this, this.PointToClient(MousePosition));
@@ -435,10 +426,31 @@ namespace YTMP
         }
 
         private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
-        { 
-            for (int c = deletionIndex; c < playlist.RowCount; c++)
+        {
+            bool visible = false;
+
+            for (int c = 0; c < playlist.RowCount; c++)
             {
-                playlist.Rows[c].Cells[0].Value = c + 1;
+                if (c >= deletionIndex)
+                {
+                    playlist.Rows[c].Cells[0].Value = c + 1;
+                }
+
+                if (playlist.Rows[c].Visible)
+                {
+                    visible = true;
+                }
+            }
+
+            string search = GetSearchText();
+
+            if (search.Length > 10 && framework.ReadyToAdd(playlist, search.Substring(search.Length - 11)))
+            {
+                Search();
+            }
+            else if (!visible)
+            {
+                SetSearchBar(0);
             }
 
             unsaved = true;

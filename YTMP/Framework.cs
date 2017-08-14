@@ -14,6 +14,8 @@ namespace YTMP
         //The API key used to access YouTube's servers
         private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
 
+        private const int IDLength = 11;
+
         //Enables the program to download JSON files from YouTube's servers
         private WebClient WC = new WebClient();
 
@@ -24,17 +26,36 @@ namespace YTMP
 
         public bool InvokeRequired { get; private set; }
 
-        private Dictionary<String, object> GetDJSON(string ID)
+        private Dictionary<String, object> GetDJSON(string ID, bool playlist)
         {
+            if (ID.Length < IDLength)
+            {
+                return null;
+            }
+
             using (WC)
             {
                 try
                 {
-                    string JSON = WC.DownloadString("https://www.googleapis.com/youtube/v3/videos?key=AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0&part=snippet,contentDetails&id=" + ID);
+                    Dictionary<String, object> DJSON;
 
-                    return serializer.Deserialize<Dictionary<String, object>>(JSON);
+                    if (!playlist)
+                    {
+                        if (!VideoExists(ID))
+                        {
+                            return null;
+                        }
+
+                        DJSON = serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/videos?key=" + API + "&part=snippet,contentDetails&id=" + ID));
+                    }
+                    else
+                    {
+                        DJSON = serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/playlistItems?key=" + API + "&part=snippet,contentDetails&playlistId=" + ID));
+                    }
+
+                    return DJSON;
                 }
-                catch (WebException WE)
+                catch (Exception e)
                 {
                     return null;
                 }
@@ -43,6 +64,11 @@ namespace YTMP
 
         private string[] GetVideoDetails(Dictionary<String, object> DJSON)
         {
+            if (DJSON == null)
+            {
+                return null;
+            }
+
             string[] details = new string[4];
 
             string time = "";
@@ -107,12 +133,23 @@ namespace YTMP
 
         private string[] GetVideoDetails(string ID)
         {
-            return GetVideoDetails(GetDJSON(ID));
+            if (ID.Length < IDLength)
+            {
+                return null;
+            }
+            else
+            {
+                return GetVideoDetails(GetDJSON(ID, false));
+            }
         }
 
         private object[] GetPlaylistEntryDetails(DataGridView playlist, int index)
         {
-            if (index >= 0 && index < playlist.RowCount)
+            if (index < 0 || index > playlist.RowCount - 1 || playlist.RowCount == 0)
+            {
+                return null;
+            }
+            else
             {
                 return new object[] { playlist.Rows[index].Cells[0].Value,
                     playlist.Rows[index].Cells[1].Value,
@@ -120,14 +157,15 @@ namespace YTMP
                     playlist.Rows[index].Cells[3].Value,
                     playlist.Rows[index].Cells[4].Value };
             }
-            else
-            {
-                return null;
-            }
         }
 
         private int EntryExists(DataGridView playlist, string ID)
         {
+            if (playlist.RowCount == 0 || ID.Length < IDLength)
+            {
+                return -1;
+            }
+
             foreach (DataGridViewRow row in playlist.Rows)
             {
                 if (row.Cells[1].Value.ToString().ToLower() == ID.ToLower())
@@ -141,6 +179,11 @@ namespace YTMP
 
         private bool VideoExists(string ID)
         {
+            if (ID.Length < IDLength)
+            {
+                return false;
+            }
+
             using (WC)
             {
                 try
@@ -158,7 +201,7 @@ namespace YTMP
 
         public bool ReadyToAdd(DataGridView playlist, string ID)
         {
-            return (VideoExists(ID) && EntryExists(playlist, ID) == -1);
+            return (ID.Length >= IDLength && GetDJSON(ID, false) != null && EntryExists(playlist, ID) == -1);
         }
 
         public void Export(DataGridView playlist, string fileName)
@@ -191,11 +234,11 @@ namespace YTMP
             {
                 while ((ID = SR.ReadLine()) != null)
                 {
-                    if (ID.Length > 10)
+                    if (ID.Length >= IDLength)
                     {
-                        ID = ID.Substring(0, 11);
+                        ID = ID.Substring(0, IDLength);
 
-                        if (VideoExists(ID))
+                        if (GetDJSON(ID, false) != null)
                         {
                             AddVideo(playlist, ID);
                         }
@@ -333,11 +376,11 @@ namespace YTMP
             return null;
         }
 
-        public void Search(DataGridView playlist, string text)
+        public int Search(DataGridView playlist, string text)
         {
             if (playlist.RowCount == 0)
             {
-                return;
+                return 0;
             }
 
             foreach (DataGridViewRow entry in playlist.Rows)
@@ -347,14 +390,14 @@ namespace YTMP
 
             if (text.Length == 0)
             {
-                return;
+                return playlist.RowCount;
             }
 
             int row = -1;
 
-            if (text.Length > 10)
+            if (text.Length >= IDLength)
             {
-                row = EntryExists(playlist, text.Substring(text.Length - 11));
+                row = EntryExists(playlist, text.Substring(text.Length - IDLength));
             }
 
             if (row != -1)
@@ -367,10 +410,12 @@ namespace YTMP
                     }
                 }
 
-                return;
+                return 1;
             }
 
             text = text.ToLower();
+
+            int count = 0;
 
             for (int c = 0; c < playlist.RowCount; c++)
             {
@@ -383,12 +428,18 @@ namespace YTMP
                         if (playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(text))
                         {
                             visible = true;
+
+                            break;
                         }
                     }
                 }
 
                 playlist.Rows[c].Visible = visible;
+
+                count += 1;
             }
+
+            return count;
         }
 
         public DataGridViewRow FindVideo(DataGridView playlist, string ID)

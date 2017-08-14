@@ -21,3 +21,4 @@ C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\x86\Debug\YTMP.
 C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\x86\Debug\YTPM.csproj.GenerateResource.Cache
 C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\x86\Debug\YTMP.exe
 C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\x86\Debug\YTMP.pdb
+C:\Users\Joseph\Documents\GitHub\YouTubePlaylistManager\YTMP\obj\x86\Debug\YTMP.ImportForm.resources

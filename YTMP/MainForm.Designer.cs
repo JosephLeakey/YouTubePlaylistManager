@@ -240,18 +240,18 @@
             // GuideButton
             // 
             this.GuideButton.Name = "GuideButton";
-            this.GuideButton.Size = new System.Drawing.Size(152, 22);
+            this.GuideButton.Size = new System.Drawing.Size(107, 22);
             this.GuideButton.Text = "Guide";
             // 
             // helpSeparator
             // 
             this.helpSeparator.Name = "helpSeparator";
-            this.helpSeparator.Size = new System.Drawing.Size(149, 6);
+            this.helpSeparator.Size = new System.Drawing.Size(104, 6);
             // 
             // AboutButton
             // 
             this.AboutButton.Name = "AboutButton";
-            this.AboutButton.Size = new System.Drawing.Size(152, 22);
+            this.AboutButton.Size = new System.Drawing.Size(107, 22);
             this.AboutButton.Text = "About";
             // 
             // minMaxToggleButton
