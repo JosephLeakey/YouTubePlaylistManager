@@ -201,6 +201,7 @@
             this.importURLButton.Name = "importURLButton";
             this.importURLButton.Size = new System.Drawing.Size(172, 22);
             this.importURLButton.Text = "Import from URL...";
+            this.importURLButton.Click += new System.EventHandler(this.importURLButton_Click);
             // 
             // playlistOptionsSeparatorB
             // 

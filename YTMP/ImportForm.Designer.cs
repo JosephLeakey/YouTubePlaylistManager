@@ -28,32 +28,36 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.addButton = new System.Windows.Forms.Button();
-            this.searchBox = new System.Windows.Forms.TextBox();
+            this.importButton = new System.Windows.Forms.Button();
+            this.addressBox = new System.Windows.Forms.TextBox();
             this.exportCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
-            // addButton
+            // importButton
             // 
-            this.addButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.addButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            this.addButton.Location = new System.Drawing.Point(657, 14);
-            this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(99, 31);
-            this.addButton.TabIndex = 9;
-            this.addButton.Text = "Import";
-            this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Visible = false;
+            this.importButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.importButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.importButton.Location = new System.Drawing.Point(657, 14);
+            this.importButton.Name = "importButton";
+            this.importButton.Size = new System.Drawing.Size(99, 31);
+            this.importButton.TabIndex = 9;
+            this.importButton.Text = "Import";
+            this.importButton.UseVisualStyleBackColor = true;
+            this.importButton.Visible = false;
+            this.importButton.Click += new System.EventHandler(this.importButton_Click);
             // 
-            // searchBox
+            // addressBox
             // 
-            this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.searchBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.searchBox.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.searchBox.Location = new System.Drawing.Point(14, 14);
-            this.searchBox.Name = "searchBox";
-            this.searchBox.Size = new System.Drawing.Size(742, 31);
-            this.searchBox.TabIndex = 8;
+            this.addressBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.addressBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.addressBox.ForeColor = System.Drawing.SystemColors.ControlDark;
+            this.addressBox.Location = new System.Drawing.Point(14, 14);
+            this.addressBox.Name = "addressBox";
+            this.addressBox.Size = new System.Drawing.Size(742, 31);
+            this.addressBox.TabIndex = 8;
+            this.addressBox.TextChanged += new System.EventHandler(this.addressBox_TextChanged);
+            this.addressBox.Enter += new System.EventHandler(this.addressBox_Enter);
+            this.addressBox.Leave += new System.EventHandler(this.addressBox_Leave);
             // 
             // exportCheckBox
             // 
@@ -72,15 +76,16 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(770, 79);
+            this.ClientSize = new System.Drawing.Size(770, 76);
             this.Controls.Add(this.exportCheckBox);
-            this.Controls.Add(this.addButton);
-            this.Controls.Add(this.searchBox);
+            this.Controls.Add(this.importButton);
+            this.Controls.Add(this.addressBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ImportForm";
             this.Text = "Import Playlist from URL";
+            this.Shown += new System.EventHandler(this.ImportForm_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -88,8 +93,8 @@
 
         #endregion
 
-        private System.Windows.Forms.Button addButton;
-        private System.Windows.Forms.TextBox searchBox;
+        private System.Windows.Forms.Button importButton;
+        private System.Windows.Forms.TextBox addressBox;
         private System.Windows.Forms.CheckBox exportCheckBox;
     }
 }

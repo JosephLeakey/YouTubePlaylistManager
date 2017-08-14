@@ -584,6 +584,13 @@ namespace YTMP
             videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
             videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
         }
+
+        private void importURLButton_Click(object sender, EventArgs e)
+        {
+            ImportForm import = new ImportForm(framework);
+
+            import.ShowDialog();
+        }
     }
 
     public class JavascriptInterface

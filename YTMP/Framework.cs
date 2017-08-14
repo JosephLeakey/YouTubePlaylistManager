@@ -14,7 +14,9 @@ namespace YTMP
         //The API key used to access YouTube's servers
         private const string API = "AIzaSyBMUx0bkglse9SvI2x69YAQZjARE3jsZG0";
 
-        private const int IDLength = 11;
+        private const int videoIDLength = 11;
+
+        private const int playlistIDLength = 34;
 
         //Enables the program to download JSON files from YouTube's servers
         private WebClient WC = new WebClient();
@@ -26,9 +28,9 @@ namespace YTMP
 
         public bool InvokeRequired { get; private set; }
 
-        private Dictionary<String, object> GetDJSON(string ID, bool playlist)
+        public Dictionary<String, object> GetDJSON(string ID, bool playlist)
         {
-            if (ID.Length < IDLength)
+            if ((!playlist && ID.Length < videoIDLength) || (playlist && ID.Length < playlistIDLength))
             {
                 return null;
             }
@@ -133,7 +135,7 @@ namespace YTMP
 
         private string[] GetVideoDetails(string ID)
         {
-            if (ID.Length < IDLength)
+            if (ID.Length < videoIDLength)
             {
                 return null;
             }
@@ -161,7 +163,7 @@ namespace YTMP
 
         private int EntryExists(DataGridView playlist, string ID)
         {
-            if (playlist.RowCount == 0 || ID.Length < IDLength)
+            if (playlist.RowCount == 0 || ID.Length < videoIDLength)
             {
                 return -1;
             }
@@ -179,7 +181,7 @@ namespace YTMP
 
         private bool VideoExists(string ID)
         {
-            if (ID.Length < IDLength)
+            if (ID.Length < videoIDLength)
             {
                 return false;
             }
@@ -201,7 +203,7 @@ namespace YTMP
 
         public bool ReadyToAdd(DataGridView playlist, string ID)
         {
-            return (ID.Length >= IDLength && GetDJSON(ID, false) != null && EntryExists(playlist, ID) == -1);
+            return (ID.Length >= videoIDLength && GetDJSON(ID, false) != null && EntryExists(playlist, ID) == -1);
         }
 
         public void Export(DataGridView playlist, string fileName)
@@ -234,9 +236,9 @@ namespace YTMP
             {
                 while ((ID = SR.ReadLine()) != null)
                 {
-                    if (ID.Length >= IDLength)
+                    if (ID.Length >= videoIDLength)
                     {
-                        ID = ID.Substring(0, IDLength);
+                        ID = ID.Substring(0, videoIDLength);
 
                         if (GetDJSON(ID, false) != null)
                         {
@@ -395,9 +397,9 @@ namespace YTMP
 
             int row = -1;
 
-            if (text.Length >= IDLength)
+            if (text.Length >= videoIDLength)
             {
-                row = EntryExists(playlist, text.Substring(text.Length - IDLength));
+                row = EntryExists(playlist, text.Substring(text.Length - videoIDLength));
             }
 
             if (row != -1)
