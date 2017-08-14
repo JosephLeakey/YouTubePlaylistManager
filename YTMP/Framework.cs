@@ -20,8 +20,6 @@ namespace YTMP
         //De-serializes JSON files into dictionaries
         private JavaScriptSerializer serializer = new JavaScriptSerializer();
 
-        
-
         private List<string> shuffleStack = new List<string>();
 
         public bool InvokeRequired { get; private set; }
@@ -156,6 +154,11 @@ namespace YTMP
                     return false;
                 }
             }
+        }
+
+        public bool ReadyToAdd(DataGridView playlist, string ID)
+        {
+            return (VideoExists(ID) && EntryExists(playlist, ID) == -1);
         }
 
         public void Export(DataGridView playlist, string fileName)
@@ -330,51 +333,62 @@ namespace YTMP
             return null;
         }
 
-        public bool Search(DataGridView playlist, string text)
+        public void Search(DataGridView playlist, string text)
         {
+            if (playlist.RowCount == 0)
+            {
+                return;
+            }
+
             foreach (DataGridViewRow entry in playlist.Rows)
             {
-                entry.Visible = false;
+                entry.Visible = true;
+            }
+
+            if (text.Length == 0)
+            {
+                return;
             }
 
             int row = -1;
 
-            if (text.Length > 10 && VideoExists(text.Substring(text.Length - 11)))
+            if (text.Length > 10)
             {
                 row = EntryExists(playlist, text.Substring(text.Length - 11));
+            }
 
+            if (row != -1)
+            {
                 foreach (DataGridViewRow entry in playlist.Rows)
                 {
-                    if (entry.Index == row || row == -1)
+                    if (entry.Index != row)
                     {
-                        entry.Visible = true;
+                        entry.Visible = false;
                     }
                 }
 
-                if (row != -1)
-                {
-                    return true;
-                }
-
-                return false;
+                return;
             }
 
             text = text.ToLower();
 
             for (int c = 0; c < playlist.RowCount; c++)
             {
+                bool visible = false;
+
                 for (int d = 0; d < playlist.Rows[0].Cells.Count - 2; d++)
                 {
-                    if (d != 1 && playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(text))
+                    if (d != 1)
                     {
-                        playlist.Rows[c].Visible = true;
-
-                        break;
+                        if (playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(text))
+                        {
+                            visible = true;
+                        }
                     }
                 }
-            }
 
-            return true;
+                playlist.Rows[c].Visible = visible;
+            }
         }
 
         public DataGridViewRow FindVideo(DataGridView playlist, string ID)

@@ -29,6 +29,12 @@
         private void InitializeComponent()
         {
             this.playlist = new System.Windows.Forms.DataGridView();
+            this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.videoName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.uploader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.length = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.playlistOptionsButton = new System.Windows.Forms.ToolStripMenuItem();
             this.newPlaylistButton = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,7 +47,7 @@
             this.shuffleToggleButton = new System.Windows.Forms.ToolStripMenuItem();
             this.helpButton = new System.Windows.Forms.ToolStripMenuItem();
             this.GuideButton = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.helpSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.AboutButton = new System.Windows.Forms.ToolStripMenuItem();
             this.minMaxToggleButton = new System.Windows.Forms.ToolStripMenuItem();
             this.onInOrderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,12 +61,6 @@
             this.previousButton = new System.Windows.Forms.Button();
             this.nextButton = new System.Windows.Forms.Button();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
-            this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.videoName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.uploader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.description = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.length = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.playlist)).BeginInit();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -95,6 +95,59 @@
             this.playlist.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.playlist_CellMouseClick);
             this.playlist.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.playlist_RowsRemoved);
             this.playlist.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.playlist_UserDeletingRow);
+            // 
+            // index
+            // 
+            this.index.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.index.Frozen = true;
+            this.index.HeaderText = "#";
+            this.index.Name = "index";
+            this.index.ReadOnly = true;
+            this.index.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.index.Width = 50;
+            // 
+            // ID
+            // 
+            this.ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.ID.HeaderText = "ID";
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
+            this.ID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ID.Visible = false;
+            // 
+            // videoName
+            // 
+            this.videoName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.videoName.HeaderText = "Name";
+            this.videoName.Name = "videoName";
+            this.videoName.ReadOnly = true;
+            this.videoName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // uploader
+            // 
+            this.uploader.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.uploader.HeaderText = "Uploader";
+            this.uploader.Name = "uploader";
+            this.uploader.ReadOnly = true;
+            this.uploader.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.uploader.Width = 200;
+            // 
+            // description
+            // 
+            this.description.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.description.HeaderText = "Description";
+            this.description.Name = "description";
+            this.description.ReadOnly = true;
+            this.description.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.description.Visible = false;
+            // 
+            // length
+            // 
+            this.length.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.length.HeaderText = "Length";
+            this.length.Name = "length";
+            this.length.ReadOnly = true;
+            this.length.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // menuStrip
             // 
@@ -178,7 +231,7 @@
             // 
             this.helpButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.GuideButton,
-            this.toolStripSeparator2,
+            this.helpSeparator,
             this.AboutButton});
             this.helpButton.Name = "helpButton";
             this.helpButton.Size = new System.Drawing.Size(44, 20);
@@ -187,18 +240,18 @@
             // GuideButton
             // 
             this.GuideButton.Name = "GuideButton";
-            this.GuideButton.Size = new System.Drawing.Size(107, 22);
+            this.GuideButton.Size = new System.Drawing.Size(152, 22);
             this.GuideButton.Text = "Guide";
             // 
-            // toolStripSeparator2
+            // helpSeparator
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(104, 6);
+            this.helpSeparator.Name = "helpSeparator";
+            this.helpSeparator.Size = new System.Drawing.Size(149, 6);
             // 
             // AboutButton
             // 
             this.AboutButton.Name = "AboutButton";
-            this.AboutButton.Size = new System.Drawing.Size(107, 22);
+            this.AboutButton.Size = new System.Drawing.Size(152, 22);
             this.AboutButton.Text = "About";
             // 
             // minMaxToggleButton
@@ -323,59 +376,6 @@
             this.nextButton.Visible = false;
             this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
             // 
-            // index
-            // 
-            this.index.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.index.Frozen = true;
-            this.index.HeaderText = "#";
-            this.index.Name = "index";
-            this.index.ReadOnly = true;
-            this.index.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.index.Width = 50;
-            // 
-            // ID
-            // 
-            this.ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.ID.HeaderText = "ID";
-            this.ID.Name = "ID";
-            this.ID.ReadOnly = true;
-            this.ID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ID.Visible = false;
-            // 
-            // videoName
-            // 
-            this.videoName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.videoName.HeaderText = "Name";
-            this.videoName.Name = "videoName";
-            this.videoName.ReadOnly = true;
-            this.videoName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // uploader
-            // 
-            this.uploader.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.uploader.HeaderText = "Uploader";
-            this.uploader.Name = "uploader";
-            this.uploader.ReadOnly = true;
-            this.uploader.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.uploader.Width = 200;
-            // 
-            // description
-            // 
-            this.description.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.description.HeaderText = "Description";
-            this.description.Name = "description";
-            this.description.ReadOnly = true;
-            this.description.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.description.Visible = false;
-            // 
-            // length
-            // 
-            this.length.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.length.HeaderText = "Length";
-            this.length.Name = "length";
-            this.length.ReadOnly = true;
-            this.length.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -419,7 +419,7 @@
         private System.Windows.Forms.ToolStripMenuItem shuffleToggleButton;
         private System.Windows.Forms.ToolStripMenuItem helpButton;
         private System.Windows.Forms.ToolStripMenuItem GuideButton;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator helpSeparator;
         private System.Windows.Forms.ToolStripMenuItem AboutButton;
         private System.Windows.Forms.ToolStripMenuItem minMaxToggleButton;
         private System.Windows.Forms.Label videoNameLabel;

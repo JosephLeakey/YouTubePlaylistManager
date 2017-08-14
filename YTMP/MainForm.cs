@@ -126,7 +126,7 @@ namespace YTMP
             SetFullView(false);
         }
 
-        public void SetSearchBar(int mode)
+        private void SetSearchBar(int mode)
         {
             switch (mode)
             {
@@ -152,8 +152,38 @@ namespace YTMP
             }
         }
 
+        private void Reset()
+        {
+            SetFullView(false);
+
+            unsaved = false;
+
+            string search = GetSearchText();
+
+            if (search.Length < 11 || !framework.ReadyToAdd(playlist, search.Substring(search.Length - 11)))
+            {
+                SetSearchBar(0);
+            }
+        }
+
+        private string GetSearchText()
+        {
+            string search = searchBox.Text;
+
+            while (search.Length > 11 && search[search.Length - 1] == char.Parse("/"))
+            {
+                search = search.Substring(0, search.Length - 1);
+            }
+
+            return search;
+        }
+
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+            playlist.ClearSelection();
+
+            playlist.Rows[e.RowIndex].Selected = true;
+
             PlayVideo(playlist.SelectedRows[0]);
         }
 
@@ -213,52 +243,58 @@ namespace YTMP
             {
                 BeginInvoke((MethodInvoker)delegate () {
                     UpdateVideoDetails(row);
+                    UpdateUIElements();
                 });
             }
             else
             {
                 UpdateVideoDetails(row);
+                UpdateUIElements();
             }
-
-            UpdateUIElements();
-
+            
             SetFullView(true);
         }
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
         {
-            if (addButton.Visible)
+            string search = GetSearchText();
+
+            if (search.Length > 10 && framework.ReadyToAdd(playlist, search.Substring(search.Length - 11)))
+            {
+                SetSearchBar(2);
+
+                search = string.Empty;
+            }
+            else if (searchBox.ForeColor != SystemColors.ControlDark)
             {
                 SetSearchBar(1);
             }
 
-            if (searchBox.Text.Length == 0 || searchBox.ForeColor == SystemColors.ControlDark)
+            if (search.Length == 0 || searchBox.ForeColor == SystemColors.ControlDark)
             {
-                foreach (DataGridViewRow entry in playlist.Rows)
+                foreach (DataGridViewRow row in playlist.Rows)
                 {
-                    entry.Visible = true;
+                    row.Visible = true;
                 }
 
                 return;
             }
 
-            if (framework.Search(playlist, searchBox.Text))
-            {
-                playlist.ClearSelection();
-            }
-            else
-            {
-                SetSearchBar(2);
-            }
+            framework.Search(playlist, search);
         }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            framework.AddVideo(playlist, searchBox.Text.Substring(searchBox.Text.Length - 11));
+            string search = GetSearchText();
+
+            framework.AddVideo(playlist, search.Substring(search.Length - 11));
 
             SetSearchBar(0);
 
             unsaved = true;
+
+            //playlist.ClearSelection();
+            //playlist.Rows[playlist.RowCount - 1].Selected = true;
         }
 
         private void MinMaxToggleButton_Click(object sender, EventArgs e)
@@ -355,9 +391,7 @@ namespace YTMP
             {
                 framework.Import(playlist, loadFileDialog.FileName);
 
-                SetFullView(false);
-
-                unsaved = false;
+                Reset();
             }
         }
 
@@ -365,6 +399,8 @@ namespace YTMP
         {
             if (e.Button == MouseButtons.Right)
             {
+                playlist.ClearSelection();
+
                 playlist.Rows[e.RowIndex].Selected = true;
 
                 menu.Show(this, this.PointToClient(MousePosition));
@@ -404,6 +440,8 @@ namespace YTMP
                 playlist.Rows[c].Cells[0].Value = c + 1;
             }
 
+            unsaved = true;
+
             if (current == null)
             {
                 return;
@@ -417,7 +455,7 @@ namespace YTMP
                     {
                         current = row;
 
-                        UpdateVideoNameTag((int)current.Cells[1].Value);
+                        UpdateVideoNameTag((int)current.Cells[0].Value);
                     }
                 }
             }
@@ -425,7 +463,10 @@ namespace YTMP
 
         private void DeleteRow(object sender, EventArgs e)
         {
-            SendKeys.Send("{DEL}");
+            foreach (DataGridViewRow row in playlist.SelectedRows)
+            {
+                playlist.Rows.Remove(row);
+            }
         }
 
         private void newPlaylistButton_Click(object sender, EventArgs e)
@@ -444,9 +485,7 @@ namespace YTMP
 
             playlist.Rows.Clear();
 
-            SetFullView(false);
-
-            SetSearchBar(0);
+            Reset();
         }
 
         private void nextButton_Click(object sender, EventArgs e)
@@ -485,7 +524,14 @@ namespace YTMP
 
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
-            framework.FindCurrentVideo(playlist, current);
+            DataGridViewRow row = framework.FindCurrentVideo(playlist, current);
+
+            if (row != null)
+            {
+                playlist.ClearSelection();
+
+                row.Selected = true;
+            }
         }
 
         private void UpdateVideoName(string name, int number)
