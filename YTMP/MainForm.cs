@@ -164,6 +164,10 @@ namespace YTMP
             {
                 SetSearchBar(0);
             }
+            else
+            {
+                SetSearchBar(2);
+            }
         }
 
         private string GetSearchText()
@@ -292,9 +296,6 @@ namespace YTMP
             SetSearchBar(0);
 
             unsaved = true;
-
-            //playlist.ClearSelection();
-            //playlist.Rows[playlist.RowCount - 1].Selected = true;
         }
 
         private void MinMaxToggleButton_Click(object sender, EventArgs e)
