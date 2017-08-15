@@ -64,16 +64,14 @@ namespace YTMP
             }
         }
 
-        private string[] GetVideoDetails(Dictionary<String, object> DJSON)
+        private object[] ExtractVideoDetails(Dictionary<String, object> DJSON)
         {
             if (DJSON == null)
             {
                 return null;
             }
 
-            string[] details = new string[4];
-
-            string time = "";
+            object[] details = new object[4];
 
             dynamic partial;
 
@@ -88,44 +86,39 @@ namespace YTMP
 
             details[0] = (string)partial["title"];
             details[1] = (string)partial["channelTitle"];
-            details[2] = (string)partial["description"];
-            details[2] = details[2].Replace("\n", "\r\n");
 
-            details[3] = (string)auxiliary["duration"];
-            details[3] = details[3].Substring(1).ToLower();
+            string description = partial["description"].Replace("\n", "\r\n");
+            details[2] = description;
 
-            if (details[3].Contains("d"))
+            string timeString = (string)auxiliary["duration"];
+            timeString = timeString.Substring(1).ToLower();
+
+            int time = 0;
+
+            if (timeString.Contains("d"))
             {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("d")))) + " : ";
+                time += int.Parse(timeString.Substring(0, timeString.IndexOf("d"))) * 86400;
             }
 
-            details[3] = details[3].Substring(details[3].IndexOf("t") + 1);
+            timeString = timeString.Substring(timeString.IndexOf("t") + 1);
 
-            if (details[3].Contains("h"))
+            if (timeString.Contains("h"))
             {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("h")))) + " : ";
+                time += int.Parse(timeString.Substring(0, timeString.IndexOf("h"))) * 3600;
 
-                details[3] = details[3].Substring(details[3].IndexOf("h") + 1);
+                timeString = timeString.Substring(timeString.IndexOf("h") + 1);
             }
 
-            if (details[3].Contains("m"))
+            if (timeString.Contains("m"))
             {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("m")))) + " : ";
+                time += int.Parse(timeString.Substring(0, timeString.IndexOf("m"))) * 60;
 
-                details[3] = details[3].Substring(details[3].IndexOf("m") + 1);
-            }
-            else
-            {
-                time += "00 : ";
+                timeString = timeString.Substring(timeString.IndexOf("m") + 1);
             }
 
-            if (details[3].Contains("s"))
+            if (timeString.Contains("s"))
             {
-                time += String.Format("{0:00}", int.Parse(details[3].Substring(0, details[3].IndexOf("s"))));
-            }
-            else
-            {
-                time += "00";
+                time += int.Parse(timeString.Substring(0, timeString.IndexOf("s")));
             }
 
             details[3] = time;
@@ -133,7 +126,7 @@ namespace YTMP
             return details;
         }
 
-        private string[] GetVideoDetails(string ID)
+        public object[] GetVideoDetails(string ID)
         {
             if (ID.Length < videoIDLength)
             {
@@ -141,45 +134,11 @@ namespace YTMP
             }
             else
             {
-                return GetVideoDetails(GetDJSON(ID, false));
+                return new object[] { ID, ExtractVideoDetails(GetDJSON(ID, false)) };
             }
         }
 
-        private object[] GetPlaylistEntryDetails(DataGridView playlist, int index)
-        {
-            if (index < 0 || index > playlist.RowCount - 1 || playlist.RowCount == 0)
-            {
-                return null;
-            }
-            else
-            {
-                return new object[] { playlist.Rows[index].Cells[0].Value,
-                    playlist.Rows[index].Cells[1].Value,
-                    playlist.Rows[index].Cells[2].Value,
-                    playlist.Rows[index].Cells[3].Value,
-                    playlist.Rows[index].Cells[4].Value };
-            }
-        }
-
-        private int EntryExists(DataGridView playlist, string ID)
-        {
-            if (playlist.RowCount == 0 || ID.Length < videoIDLength)
-            {
-                return -1;
-            }
-
-            foreach (DataGridViewRow row in playlist.Rows)
-            {
-                if (row.Cells[1].Value.ToString().ToLower() == ID.ToLower())
-                {
-                    return row.Index;
-                }
-            }
-
-            return -1;
-        }
-
-        private bool VideoExists(string ID)
+        public bool VideoExists(string ID)
         {
             if (ID.Length < videoIDLength)
             {
@@ -201,36 +160,33 @@ namespace YTMP
             }
         }
 
-        public bool ReadyToAdd(DataGridView playlist, string ID)
-        {
-            return (ID.Length >= videoIDLength && GetDJSON(ID, false) != null && EntryExists(playlist, ID) == -1);
-        }
-
-        public void Export(DataGridView playlist, string fileName)
+        public void Export(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, string fileName)
         {
             using (System.IO.StreamWriter SW = new System.IO.StreamWriter(fileName))
-            {
-                int rowCount = playlist.RowCount;
-         
-                for (int i = 0; i < rowCount; i++)
+            {         
+                for (int i = 0; i < listing.Count; i++)
                 {
-                    if (i < rowCount - 1)
+                    string ID = listing[i];
+
+                    object[] entry = playlist[ID];
+
+                    if (i < listing.Count - 1)
                     {
-                        SW.WriteLine(playlist.Rows[i].Cells[1].Value + " - [" + playlist.Rows[i].Cells[3].Value + "] " + playlist.Rows[i].Cells[2].Value);
+                        SW.WriteLine(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
                     }
                     else
                     {
-                        SW.Write(playlist.Rows[i].Cells[1].Value + " - [" + playlist.Rows[i].Cells[3].Value + "] " + playlist.Rows[i].Cells[2].Value);
+                        SW.Write(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
                     }
                 }
             }
         }
 
-        public void Import(DataGridView playlist, string fileName)
+        public void Import(Dictionary<string, object[]> playlist, string fileName)
         {
             string ID;
 
-            playlist.Rows.Clear();
+            playlist.Clear();
 
             using (System.IO.StreamReader SR = new System.IO.StreamReader(fileName))
             {
@@ -242,224 +198,103 @@ namespace YTMP
 
                         if (GetDJSON(ID, false) != null)
                         {
-                            AddVideo(playlist, ID);
+                            playlist[ID] = (object[])GetVideoDetails(ID)[1];
                         }
                     }
                 }
             }
         }
 
-        public void AddVideo(DataGridView playlist, string ID)
+        public string NextVideo(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, ref int currentIndex)
         {
-            string[] details = GetVideoDetails(ID);
-
-            playlist.Rows.Add(playlist.Rows.Count + 1, ID, details[0], details[1], details[2], details[3]);
-        }
-
-        public DataGridViewRow Advance(DataGridView playlist, DataGridViewRow current)
-        {
-            DataGridViewRow next = NextVideo(playlist, current.Cells[1].Value.ToString());
-
-            if (next != null)
+            if (playlist.Count > 0)
             {
-                return next;
-            }
-
-            next = NextVideo(playlist, (int)current.Cells[0].Value - 1);
-
-            if (next != null)
-            {
-                return next;
-            }
-
-            return null;
-        }
-
-        public DataGridViewRow NextVideo(DataGridView playlist, string currentID)
-        {
-            if (playlist.RowCount > 0)
-            {
-                foreach (DataGridViewRow row in playlist.Rows)
+                if (currentIndex > playlist.Count - 1 || currentIndex == playlist.Count - 1)
                 {
-                    if (row.Cells[1].Value.ToString() == currentID)
-                    {
-                        if (row.Index < playlist.RowCount - 1)
-                        {
-                            return playlist.Rows[row.Index + 1];
-                        }
-                        else
-                        {
-                            return playlist.Rows[0];
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public DataGridViewRow NextVideo(DataGridView playlist, int currentIndex)
-        {
-            if (playlist.RowCount > 0)
-            {
-                if (playlist.RowCount < currentIndex)
-                {
-                    return playlist.Rows[playlist.RowCount - 1];
-                }
-                else if (currentIndex == playlist.RowCount)
-                {
-                    return playlist.Rows[0];
+                    currentIndex = 0;
                 }
                 else
                 {
-                    return playlist.Rows[currentIndex];
+                    currentIndex += 1;
                 }
+
+                return listing[currentIndex];
             }
 
             return null;
         }
 
-        public DataGridViewRow Retreat(DataGridView playlist, DataGridViewRow current)
+        public string PreviousVideo(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, ref int currentIndex)
         {
-            DataGridViewRow previous = PreviousVideo(playlist, current.Cells[1].Value.ToString());
-
-            if (previous != null)
+            if (playlist.Count > 0)
             {
-                return previous;
-            }
-
-            previous = PreviousVideo(playlist, (int)current.Cells[0].Value);
-
-            if (previous != null)
-            {
-                return previous;
-            }
-
-            return null;
-        }
-
-        public DataGridViewRow PreviousVideo(DataGridView playlist, string currentID)
-        {
-            if (playlist.RowCount > 0)
-            {
-                foreach (DataGridViewRow row in playlist.Rows)
+                if (currentIndex > playlist.Count - 1 || currentIndex == 0)
                 {
-                    if (row.Cells[1].Value.ToString() == currentID)
-                    {
-                        if (row.Index > 0)
-                        {
-                            return playlist.Rows[row.Index - 1];
-                        }
-                        else
-                        {
-                            return playlist.Rows[playlist.RowCount - 1];
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public DataGridViewRow PreviousVideo(DataGridView playlist, int currentIndex)
-        {
-            if (playlist.RowCount > 0)
-            {
-                if (playlist.RowCount < currentIndex || currentIndex == 0)
-                {
-                    return playlist.Rows[playlist.RowCount - 1];
+                    currentIndex = playlist.Count - 1;
                 }
                 else
                 {
-                    return playlist.Rows[currentIndex - 1];
+                    currentIndex -= 1;
                 }
+
+                return listing[currentIndex];
             }
 
             return null;
         }
-
-        public int Search(DataGridView playlist, string text)
+        
+        public string[] Search(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, string text)
         {
-            if (playlist.RowCount == 0)
+            if (playlist.Count == 0)
             {
-                return 0;
-            }
-
-            foreach (DataGridViewRow entry in playlist.Rows)
-            {
-                entry.Visible = true;
+                return new string[0];
             }
 
             if (text.Length == 0)
             {
-                return playlist.RowCount;
+                return playlist.Keys.ToArray();
             }
 
-            int row = -1;
-
-            if (text.Length >= videoIDLength)
+            if (text.Length >= videoIDLength && playlist[text.Substring(text.Length - videoIDLength)] != null)
             {
-                row = EntryExists(playlist, text.Substring(text.Length - videoIDLength));
-            }
-
-            if (row != -1)
-            {
-                foreach (DataGridViewRow entry in playlist.Rows)
-                {
-                    if (entry.Index != row)
-                    {
-                        entry.Visible = false;
-                    }
-                }
-
-                return 1;
+                return new string[] { text.Substring(text.Length - videoIDLength) };
             }
 
             text = text.ToLower();
 
-            int count = 0;
+            List<string> search = new List<string>();
 
-            for (int c = 0; c < playlist.RowCount; c++)
+            int parse;
+
+            if (int.TryParse(text, out parse) && listing[parse] != null)
             {
-                bool visible = false;
+                search.Add(listing[parse]);
+            }
 
-                for (int d = 0; d < playlist.Rows[0].Cells.Count - 2; d++)
+            foreach (string ID in playlist.Keys)
+            {
+                if (!search.Contains(ID))
                 {
-                    if (d != 1)
+                    foreach (object item in playlist[ID])
                     {
-                        if (playlist.Rows[c].Cells[d].Value.ToString().ToLower().Contains(text))
+                        if (item.ToString().ToLower().Contains(text))
                         {
-                            visible = true;
+                            search.Add(ID);
 
                             break;
                         }
                     }
                 }
-
-                playlist.Rows[c].Visible = visible;
-
-                count += 1;
             }
 
-            return count;
-        }
-
-        public DataGridViewRow FindVideo(DataGridView playlist, string ID)
-        {
-            foreach (DataGridViewRow row in playlist.Rows)
+            if (search.Count > 0)
             {
-                if (row.Cells[1].Value.ToString() == ID)
-                {
-                    return row;
-                }
+                return search.ToArray();
             }
-
-            return null;
-        }
-
-        public DataGridViewRow FindCurrentVideo(DataGridView playlist, DataGridViewRow current)
-        {
-            return FindVideo(playlist, current.Cells[1].Value.ToString());
+            else
+            {
+                return new string[0];
+            }
         }
     }
 }

@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.playlist = new System.Windows.Forms.DataGridView();
+            this.playlistGrid = new System.Windows.Forms.DataGridView();
             this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.videoName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -61,40 +61,40 @@
             this.previousButton = new System.Windows.Forms.Button();
             this.nextButton = new System.Windows.Forms.Button();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
-            ((System.ComponentModel.ISupportInitialize)(this.playlist)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.playlistGrid)).BeginInit();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
-            // playlist
+            // playlistGrid
             // 
-            this.playlist.AllowUserToAddRows = false;
-            this.playlist.AllowUserToResizeColumns = false;
-            this.playlist.AllowUserToResizeRows = false;
-            this.playlist.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.playlistGrid.AllowUserToAddRows = false;
+            this.playlistGrid.AllowUserToResizeColumns = false;
+            this.playlistGrid.AllowUserToResizeRows = false;
+            this.playlistGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.playlist.ColumnHeadersHeight = 25;
-            this.playlist.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            this.playlist.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.playlistGrid.ColumnHeadersHeight = 25;
+            this.playlistGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.playlistGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.index,
             this.ID,
             this.videoName,
             this.uploader,
             this.description,
             this.length});
-            this.playlist.Location = new System.Drawing.Point(14, 67);
-            this.playlist.Name = "playlist";
-            this.playlist.ReadOnly = true;
-            this.playlist.RowHeadersVisible = false;
-            this.playlist.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            this.playlist.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.playlist.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.playlist.Size = new System.Drawing.Size(742, 600);
-            this.playlist.TabIndex = 4;
-            this.playlist.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Playlist_CellDoubleClick);
-            this.playlist.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.playlist_CellMouseClick);
-            this.playlist.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.playlist_RowsRemoved);
-            this.playlist.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.playlist_UserDeletingRow);
+            this.playlistGrid.Location = new System.Drawing.Point(14, 67);
+            this.playlistGrid.Name = "playlistGrid";
+            this.playlistGrid.ReadOnly = true;
+            this.playlistGrid.RowHeadersVisible = false;
+            this.playlistGrid.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            this.playlistGrid.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.playlistGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.playlistGrid.Size = new System.Drawing.Size(742, 600);
+            this.playlistGrid.TabIndex = 4;
+            this.playlistGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Playlist_CellDoubleClick);
+            this.playlistGrid.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.playlist_CellMouseClick);
+            this.playlistGrid.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.playlist_RowsRemoved);
+            this.playlistGrid.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.playlist_UserDeletingRow);
             // 
             // index
             // 
@@ -390,14 +390,14 @@
             this.Controls.Add(this.videoNameLabel);
             this.Controls.Add(this.addButton);
             this.Controls.Add(this.searchBox);
-            this.Controls.Add(this.playlist);
+            this.Controls.Add(this.playlistGrid);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             this.MinimumSize = new System.Drawing.Size(1280, 720);
             this.Name = "MainForm";
             this.Text = "YouTube Playlist Manager";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.playlist)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.playlistGrid)).EndInit();
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
@@ -406,7 +406,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.DataGridView playlist;
+        private System.Windows.Forms.DataGridView playlistGrid;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem playlistOptionsButton;
         private System.Windows.Forms.ToolStripMenuItem importFileButton;
