@@ -129,7 +129,7 @@ namespace YTMP
             //Display placeholder text within the search-bar
             searchBox.Text = searchBoxText;
 
-            menu.MenuItems.Add(new MenuItem("Delete", new EventHandler(DeleteRow)));
+            menu.MenuItems.Add(new MenuItem("Delete", new EventHandler(DeleteMenuItemEventHandler)));
 
             SetFullView(false);
         }
@@ -178,6 +178,8 @@ namespace YTMP
 
             playlistGrid.Rows[e.RowIndex].Selected = true;
 
+            current = e.RowIndex;
+
             PlayVideo(e.RowIndex);
         }
 
@@ -206,6 +208,8 @@ namespace YTMP
             }
             else if (!state && this.MinimumSize.Width == 1280)
             {
+                try { player.GetMainFrame().ExecuteJavaScriptAsync("player.stopVideo()"); } catch { }
+
                 player.Visible = false;
                 videoNameLabel.Visible = false;
                 videoUploaderLabel.Visible = false;
@@ -227,9 +231,34 @@ namespace YTMP
             }
         }
 
+        private void ResetApplication()
+        {
+            SetFullView(false);
+
+            exportFileButton.Enabled = false;
+
+            string search = GetSearchText();
+
+            if (framework.VideoExists(search.Substring(search.Length - 11)))
+            {
+                SetSearchBar(2);
+            }
+            else
+            {
+                SetSearchBar(0);
+            }
+
+            unsaved = false;
+        }
+
         public void PlayVideo(int index)
         {
-            current = index;
+            if (!framework.VideoExists(listing[current]))
+            {
+                MessageBox.Show("This video could not be loaded.\n\nPlease check your internet connection\nand make sure that the video still exists.", "Unable to Load Video", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                return;
+            }
 
             player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + listing[current] + @""")");
 
@@ -247,6 +276,18 @@ namespace YTMP
             }
             
             SetFullView(true);
+        }
+
+        private bool CheckYouTube()
+        {
+            if (framework.YouTubeAvailable())
+            {
+                return true;
+            }
+
+            MessageBox.Show("YouTube could not be reached.\n\nPlease check your internet connection.", "Unable to Contact YouTube", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            return false;
         }
 
         private void Search()
@@ -300,17 +341,57 @@ namespace YTMP
             string ID = GetSearchText();
             ID = ID.Substring(ID.Length - 11);
 
-            playlist[ID] = (object[])framework.GetVideoDetails(ID)[1];
+            object[] entry = framework.GetVideoDetails(ID);
 
-            listing[playlistGrid.RowCount] = ID;
+            playlist[ID] = (object[])entry[1];
 
-            playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, playlist[ID][0], playlist[ID][1], playlist[ID][2], playlist[ID][3]);
+            AddVideoToGrid(ID, (object[])entry[1]);
+
+            newPlaylistButton.Enabled = true;
+
+            exportFileButton.Enabled = true;
 
             SetSearchBar(0);
 
             visibleCount += 1;
 
             unsaved = true;
+        }
+
+        private void AddVideoToGrid(string ID, object[] details)
+        {
+            int time = (int)details[3];
+            string timeString = string.Empty;
+
+            if (time / 86400 > 0)
+            {
+                timeString += string.Format("{0:00}", time / 86400) + ":";
+
+                time = time % 86400;
+            }
+
+            if (time / 3600 > 0)
+            {
+                timeString += string.Format("{0:00}", time / 3600) + ":";
+
+                time = time % 3600;
+            }
+
+            if (time / 60 > 0)
+            {
+                timeString += string.Format("{0:00}", time / 60) + ":";
+
+                time = time % 60;
+            }
+
+            if (time > 0)
+            {
+                timeString += string.Format("{0:00}", time);
+            }
+
+            playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], timeString);
+
+            listing[playlistGrid.RowCount - 1] = ID;
         }
 
         private void MinMaxToggleButton_Click(object sender, EventArgs e)
@@ -391,7 +472,12 @@ namespace YTMP
 
         private void importFileButton_Click(object sender, EventArgs e)
         {
-            if (unsaved)
+            if (!CheckYouTube())
+            {
+                return;
+            }
+
+            if (unsaved && exportFileButton.Enabled)
             {
                 switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
@@ -411,16 +497,16 @@ namespace YTMP
 
                 foreach (string entry in playlist.Keys)
                 {
-                    listing[playlistGrid.RowCount] = entry;
+                    AddVideoToGrid(entry, playlist[entry]);
 
-                    playlistGrid.Rows.Add(playlistGrid.RowCount + 1, entry, playlist[entry][0], playlist[entry][1], playlist[entry][2], playlist[entry][3]);
+                    listing[playlistGrid.RowCount - 1] = entry;
                 }
 
                 visibleCount = playlistGrid.RowCount;
 
-                SetFullView(false);
+                newPlaylistButton.Enabled = true;
 
-                unsaved = false;
+                ResetApplication();
             }
         }
 
@@ -435,6 +521,21 @@ namespace YTMP
         }
 
         private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        {
+            DeletionPreparation();
+        }
+
+        private void DeleteMenuItemEventHandler(object sender, EventArgs e)
+        {
+            DeletionPreparation();
+
+            foreach (DataGridViewRow row in playlistGrid.SelectedRows)
+            {
+                playlistGrid.Rows.Remove(row);
+            }
+        }
+
+        private void DeletionPreparation()
         {
             if (deletionIndex == -1)
             {
@@ -503,21 +604,17 @@ namespace YTMP
                     Search();
                 }
 
-                unsaved = true;
-            }
-        }
+                newPlaylistButton.Enabled = (playlistGrid.RowCount > 0 || player.Visible);
 
-        private void DeleteRow(object sender, EventArgs e)
-        {
-            foreach (DataGridViewRow row in playlistGrid.SelectedRows)
-            {
-                playlistGrid.Rows.Remove(row);
+                exportFileButton.Enabled = (playlistGrid.RowCount > 0);
+
+                unsaved = true;
             }
         }
 
         private void newPlaylistButton_Click(object sender, EventArgs e)
         {
-            if (unsaved)
+            if (unsaved && exportFileButton.Enabled)
             {
                 switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you make a new one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
@@ -533,9 +630,7 @@ namespace YTMP
 
             visibleCount = 0;
 
-            SetFullView(false);
-
-            unsaved = false;
+            ResetApplication();
         }
 
         private void nextButton_Click(object sender, EventArgs e)
@@ -620,6 +715,11 @@ namespace YTMP
 
         private void importURLButton_Click(object sender, EventArgs e)
         {
+            if (!CheckYouTube())
+            {
+                return;
+            }
+
             ImportForm import = new ImportForm(framework);
 
             import.ShowDialog();

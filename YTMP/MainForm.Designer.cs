@@ -179,6 +179,7 @@
             // 
             // newPlaylistButton
             // 
+            this.newPlaylistButton.Enabled = false;
             this.newPlaylistButton.Name = "newPlaylistButton";
             this.newPlaylistButton.Size = new System.Drawing.Size(172, 22);
             this.newPlaylistButton.Text = "New Playlist";
@@ -210,6 +211,7 @@
             // 
             // exportFileButton
             // 
+            this.exportFileButton.Enabled = false;
             this.exportFileButton.Name = "exportFileButton";
             this.exportFileButton.Size = new System.Drawing.Size(172, 22);
             this.exportFileButton.Text = "Export to File...";

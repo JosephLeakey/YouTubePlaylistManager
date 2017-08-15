@@ -160,6 +160,26 @@ namespace YTMP
             }
         }
 
+        public bool YouTubeAvailable()
+        {
+            using (HttpWebResponse HTTP = (HttpWebResponse)WebRequest.Create("https://www.youtube.com/").GetResponse())
+            {
+                try
+                {
+                    if (HTTP == null || HTTP.StatusCode != HttpStatusCode.OK)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+                catch (WebException WE)
+                {
+                    return false;
+                }
+            }
+        }
+
         public void Export(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, string fileName)
         {
             using (System.IO.StreamWriter SW = new System.IO.StreamWriter(fileName))
@@ -255,7 +275,7 @@ namespace YTMP
                 return playlist.Keys.ToArray();
             }
 
-            if (text.Length >= videoIDLength && playlist[text.Substring(text.Length - videoIDLength)] != null)
+            if (text.Length >= videoIDLength && playlist.ContainsKey(text.Substring(text.Length - videoIDLength)))
             {
                 return new string[] { text.Substring(text.Length - videoIDLength) };
             }
@@ -266,18 +286,20 @@ namespace YTMP
 
             int parse;
 
-            if (int.TryParse(text, out parse) && listing[parse] != null)
+            if (int.TryParse(text, out parse) && listing.ContainsKey(parse - 1))
             {
-                search.Add(listing[parse]);
+                search.Add(listing[parse - 1]);
             }
 
             foreach (string ID in playlist.Keys)
             {
                 if (!search.Contains(ID))
                 {
-                    foreach (object item in playlist[ID])
+                    object[] entry = playlist[ID];
+
+                    for (int i = 0; i < 2; i++)
                     {
-                        if (item.ToString().ToLower().Contains(text))
+                        if (entry[i].ToString().ToLower().Contains(text))
                         {
                             search.Add(ID);
 

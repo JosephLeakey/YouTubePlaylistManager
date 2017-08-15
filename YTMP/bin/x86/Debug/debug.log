@@ -414,3 +414,120 @@
 [0815/202902.128:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
 [0815/202904.666:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
 [0815/202921.801:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/203021.130:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/203046.036:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/203108.096:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/203159.751:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/203424.575:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/203503.835:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/203556.627:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/204046.394:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/204448.205:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/204536.176:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/204551.219:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/204648.164:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/204650.167:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/204704.785:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/204712.794:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/204715.336:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/205516.139:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/211211.567:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/211410.669:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/211510.530:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/211615.193:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/211642.830:ERROR:broker_win.cc(59)] Error reading broker pipe: The pipe has been ended. (0x6D)
+[0815/211726.734:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/211748.494:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/211752.963:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/211754.011:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 31
+[0815/211754.053:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 55
+[0815/211754.082:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 53
+[0815/211754.119:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 51
+[0815/211754.147:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 41
+[0815/211754.182:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 73
+[0815/211754.275:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 71
+[0815/211754.301:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 69
+[0815/211754.328:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 67
+[0815/211754.411:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 65
+[0815/211754.421:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 81
+[0815/211754.423:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 95
+[0815/211754.488:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 93
+[0815/211754.524:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 91
+[0815/211754.639:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 89
+[0815/211754.640:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 87
+[0815/211756.366:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 147
+[0815/211756.420:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 149
+[0815/211756.473:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 151
+[0815/211756.501:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 153
+[0815/211756.579:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 155
+[0815/211756.606:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 157
+[0815/211756.686:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 159
+[0815/211756.771:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 161
+[0815/211756.795:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 163
+[0815/211756.849:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 165
+[0815/211756.947:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 167
+[0815/211756.955:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 169
+[0815/211757.057:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 171
+[0815/211758.776:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/211758.866:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 223
+[0815/211758.928:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 203
+[0815/211759.007:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 199
+[0815/211759.086:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 195
+[0815/211759.140:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 193
+[0815/211759.240:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 191
+[0815/211759.281:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 189
+[0815/211759.335:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 187
+[0815/211759.395:WARNING:spdy_session.cc(2276)] Received HEADERS for invalid stream 185
+[0815/211802.644:ERROR:render_process_host_impl.cc(2077)] Request for unknown Channel-associated interface: device::mojom::ScreenOrientationListener
+[0815/211820.559:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/211836.292:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/211853.546:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/211939.320:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/211954.037:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/212027.854:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/212838.226:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/213042.585:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/213136.125:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/213710.193:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/213733.899:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/214018.005:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/214049.331:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/214506.578:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/214638.274:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/214647.091:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/214722.376:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/215213.965:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/220137.897:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/220200.989:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/220543.542:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/220946.687:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/221046.925:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221047.824:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/221051.927:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221056.929:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221101.930:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221106.933:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221111.936:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221116.937:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221121.940:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221126.942:WARNING:dns_config_service_win.cc(661)] Failed to read DnsConfig.
+[0815/221201.523:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/221802.805:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/221910.836:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/222142.095:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/222219.721:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/222256.352:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/222443.671:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/222457.598:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/222521.937:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/222545.900:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/222809.205:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/223057.986:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/223230.181:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/223313.001:ERROR:child_thread_impl.cc(762)] Request for unknown Channel-associated interface: ui::mojom::GpuMain
+[0815/223322.174:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/223325.356:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/223330.985:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/223334.713:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/223341.438:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
+[0815/223355.235:WARNING:htmlmediaelement.cpp(1949)] currentPlaybackPosition readyState = 4 but no webMeidaPlayer to provide currentPlaybackPosition
