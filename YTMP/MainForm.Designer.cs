@@ -229,6 +229,7 @@
             this.shuffleToggleButton.Name = "shuffleToggleButton";
             this.shuffleToggleButton.Size = new System.Drawing.Size(83, 20);
             this.shuffleToggleButton.Text = "Shuffle: OFF";
+            this.shuffleToggleButton.Click += new System.EventHandler(this.shuffleToggleButton_Click);
             // 
             // helpButton
             // 

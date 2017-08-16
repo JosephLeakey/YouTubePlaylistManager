@@ -87,6 +87,8 @@ namespace YTMP
 
         private int visibleCount;
 
+        private bool online;
+
         public Dictionary<string, object[]> playlist = new Dictionary<string, object[]>();
 
         public Dictionary<int, string> listing = new Dictionary<int, string>();
@@ -96,6 +98,8 @@ namespace YTMP
         public bool autoplay = true;
 
         public bool shuffle = false;
+
+        //private Stack<string> shuffleStack = new Stack<string>();
 
         public MainForm()
         {
@@ -177,6 +181,13 @@ namespace YTMP
             playlistGrid.ClearSelection();
 
             playlistGrid.Rows[e.RowIndex].Selected = true;
+
+            if (!CheckYouTube(false, true))
+            {
+                SetFullView(false);
+
+                return;
+            }
 
             current = e.RowIndex;
 
@@ -278,18 +289,6 @@ namespace YTMP
             SetFullView(true);
         }
 
-        private bool CheckYouTube()
-        {
-            if (framework.YouTubeAvailable())
-            {
-                return true;
-            }
-
-            MessageBox.Show("YouTube could not be reached.\n\nPlease check your internet connection.", "Unable to Contact YouTube", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-            return false;
-        }
-
         private void Search()
         {
             string search = GetSearchText();
@@ -345,7 +344,7 @@ namespace YTMP
 
             playlist[ID] = (object[])entry[1];
 
-            AddVideoToGrid(ID, (object[])entry[1]);
+            AddVideoToGrid(ID, (object[])entry[1], true);
 
             newPlaylistButton.Enabled = true;
 
@@ -358,38 +357,45 @@ namespace YTMP
             unsaved = true;
         }
 
-        private void AddVideoToGrid(string ID, object[] details)
+        private void AddVideoToGrid(string ID, object[] details, bool format)
         {
-            int time = (int)details[3];
-            string timeString = string.Empty;
-
-            if (time / 86400 > 0)
+            if (format)
             {
-                timeString += string.Format("{0:00}", time / 86400) + ":";
+                int time = (int)details[3];
+                string timeString = string.Empty;
 
-                time = time % 86400;
+                if (time / 86400 > 0)
+                {
+                    timeString += string.Format("{0:00}", time / 86400) + ":";
+
+                    time = time % 86400;
+                }
+
+                if (time / 3600 > 0)
+                {
+                    timeString += string.Format("{0:00}", time / 3600) + ":";
+
+                    time = time % 3600;
+                }
+
+                if (time / 60 > 0)
+                {
+                    timeString += string.Format("{0:00}", time / 60) + ":";
+
+                    time = time % 60;
+                }
+
+                if (time > 0)
+                {
+                    timeString += string.Format("{0:00}", time);
+                }
+
+                playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], timeString);
             }
-
-            if (time / 3600 > 0)
+            else
             {
-                timeString += string.Format("{0:00}", time / 3600) + ":";
-
-                time = time % 3600;
+                playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], details[3]);
             }
-
-            if (time / 60 > 0)
-            {
-                timeString += string.Format("{0:00}", time / 60) + ":";
-
-                time = time % 60;
-            }
-
-            if (time > 0)
-            {
-                timeString += string.Format("{0:00}", time);
-            }
-
-            playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], timeString);
 
             listing[playlistGrid.RowCount - 1] = ID;
         }
@@ -472,11 +478,6 @@ namespace YTMP
 
         private void importFileButton_Click(object sender, EventArgs e)
         {
-            if (!CheckYouTube())
-            {
-                return;
-            }
-
             if (unsaved && exportFileButton.Enabled)
             {
                 switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
@@ -491,13 +492,13 @@ namespace YTMP
 
             if (loadFileDialog.ShowDialog() == DialogResult.OK)
             {
-                framework.Import(playlist, loadFileDialog.FileName);
+                online = framework.Import(playlist, loadFileDialog.FileName);
 
                 playlistGrid.Rows.Clear();
 
                 foreach (string entry in playlist.Keys)
                 {
-                    AddVideoToGrid(entry, playlist[entry]);
+                    AddVideoToGrid(entry, playlist[entry], online);
 
                     listing[playlistGrid.RowCount - 1] = entry;
                 }
@@ -649,20 +650,6 @@ namespace YTMP
             }
         }
 
-        private void autoPlayToggleButton_Click(object sender, EventArgs e)
-        {
-            autoplay = !autoplay;
-
-            if (autoplay)
-            {
-                autoPlayToggleButton.Text = "Auto-Play: ON";
-            }
-            else
-            {
-                autoPlayToggleButton.Text = "Auto-Play: OFF";
-            }
-        }
-
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
             if (videoNameLabel.Text.Substring(0, 3) != "[-]")
@@ -715,7 +702,7 @@ namespace YTMP
 
         private void importURLButton_Click(object sender, EventArgs e)
         {
-            if (!CheckYouTube())
+            if (!CheckYouTube(true, true))
             {
                 return;
             }
@@ -723,6 +710,53 @@ namespace YTMP
             ImportForm import = new ImportForm(framework);
 
             import.ShowDialog();
+        }
+
+        public bool CheckYouTube(bool refresh, bool message)
+        {
+            online = framework.YouTubeAvailable(refresh);
+
+            if (!online)
+            {
+                if (message)
+                {
+                    MessageBox.Show("YouTube could not be reached\n\nPlease check your internet connection.", "Unable to Contact YouTube", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private void autoPlayToggleButton_Click(object sender, EventArgs e)
+        {
+            autoplay = !autoplay;
+
+            if (autoplay)
+            {
+                autoPlayToggleButton.Text = "Auto-Play: ON";
+            }
+            else
+            {
+                autoPlayToggleButton.Text = "Auto-Play: OFF";
+            }
+        }
+
+        private void shuffleToggleButton_Click(object sender, EventArgs e)
+        {
+            shuffle = !shuffle;
+
+            if (shuffle)
+            {
+                shuffleToggleButton.Text = "Shuffle: ON";
+            }
+            else
+            {
+                //shuffleStack.Clear();
+
+                shuffleToggleButton.Text = "Shuffle: OFF";
+            }
         }
     }
 
@@ -739,9 +773,19 @@ namespace YTMP
 
         public void NextVideo()
         {
-            if (form.autoplay && framework.NextVideo(form.playlist, form.listing, ref form.current) != null)
+            if (form.autoplay)
             {
-                form.PlayVideo(form.current);
+                if (!form.CheckYouTube(false, false))
+                {
+                    form.SetFullView(false);
+
+                    return;
+                }
+                
+                if ((!form.shuffle && framework.NextVideo(form.playlist, form.listing, ref form.current) != null) || (form.shuffle && framework.RandomVideo(form.playlist, form.listing, ref form.current) != null))
+                {
+                    form.PlayVideo(form.current);
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
@@ -160,28 +161,31 @@ namespace YTMP
             }
         }
 
-        public bool YouTubeAvailable()
+        public bool YouTubeAvailable(bool connect)
         {
-            using (HttpWebResponse HTTP = (HttpWebResponse)WebRequest.Create("https://www.youtube.com/").GetResponse())
-            {
-                try
-                {
-                    if (HTTP == null || HTTP.StatusCode != HttpStatusCode.OK)
-                    {
-                        return false;
-                    }
+            if (!NetworkInterface.GetIsNetworkAvailable()) { return false; }
 
+            if (!connect) { return true; }
+
+            try
+            {
+                using (HttpWebResponse HTTP = (HttpWebResponse)WebRequest.Create("https://www.youtube.com/").GetResponse())
+                {
                     return true;
                 }
-                catch (WebException WE)
-                {
-                    return false;
-                }
             }
+            catch (WebException WE) { return false; }
         }
 
         public void Export(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, string fileName)
         {
+            if (listing.Count != playlist.Count || listing.Count == 0)
+            {
+                return;
+            }
+
+            bool full = false;
+
             using (System.IO.StreamWriter SW = new System.IO.StreamWriter(fileName))
             {         
                 for (int i = 0; i < listing.Count; i++)
@@ -192,37 +196,75 @@ namespace YTMP
 
                     if (i < listing.Count - 1)
                     {
-                        SW.WriteLine(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
+                        if (entry[1] != string.Empty)
+                        {
+                            SW.WriteLine(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
+                        }
+                        else
+                        {
+                            SW.WriteLine(entry[0]);
+                        }
                     }
                     else
                     {
-                        SW.Write(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
+                        if (entry[1] != string.Empty)
+                        {
+                            SW.Write(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
+                        }
+                        else
+                        {
+                            SW.Write(entry[0]);
+                        }
                     }
                 }
             }
         }
 
-        public void Import(Dictionary<string, object[]> playlist, string fileName)
+        public bool Import(Dictionary<string, object[]> playlist, string fileName)
         {
-            string ID;
+            string line, ID;
 
             playlist.Clear();
 
+            bool available = YouTubeAvailable(true);
+
             using (System.IO.StreamReader SR = new System.IO.StreamReader(fileName))
             {
-                while ((ID = SR.ReadLine()) != null)
+                while ((line = SR.ReadLine()) != null)
                 {
-                    if (ID.Length >= videoIDLength)
+                    if (line.Length >= videoIDLength)
                     {
-                        ID = ID.Substring(0, videoIDLength);
+                        ID = line.Substring(0, videoIDLength);
 
-                        if (GetDJSON(ID, false) != null)
+                        if (available)
                         {
-                            playlist[ID] = (object[])GetVideoDetails(ID)[1];
+                            if (GetDJSON(ID, false) != null)
+                            {
+                                playlist[ID] = (object[])GetVideoDetails(ID)[1];
+                            }
+                        }
+                        else
+                        {
+                            bool valid = true;
+
+                            for (int i = 0; i < ID.Length; i++)
+                            {
+                                if (!char.IsLetterOrDigit(ID[i]) && ID[i] != char.Parse("_"))
+                                {
+                                    valid = false;
+                                }
+                            }
+
+                            if (valid)
+                            {
+                                playlist[ID] = new object[] { line, string.Empty, string.Empty, null };
+                            }
                         }
                     }
                 }
             }
+
+            return available;
         }
 
         public string NextVideo(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, ref int currentIndex)
@@ -262,7 +304,29 @@ namespace YTMP
 
             return null;
         }
-        
+
+        public string RandomVideo(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, ref int currentIndex)
+        {
+            if (playlist.Count > 0)
+            {
+                Random RNGesus = new Random();
+
+                int index;
+
+                do
+                {
+                    index = RNGesus.Next(0, playlist.Count);
+                } while (index == currentIndex);
+
+                currentIndex = index;
+
+                return listing[currentIndex];
+            }
+
+            return null;
+        }
+
+
         public string[] Search(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, string text)
         {
             if (playlist.Count == 0)
