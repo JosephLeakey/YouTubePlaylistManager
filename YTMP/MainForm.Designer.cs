@@ -84,17 +84,20 @@
             this.length});
             this.playlistGrid.Location = new System.Drawing.Point(14, 67);
             this.playlistGrid.Name = "playlistGrid";
-            this.playlistGrid.ReadOnly = true;
             this.playlistGrid.RowHeadersVisible = false;
             this.playlistGrid.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.playlistGrid.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.playlistGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.playlistGrid.Size = new System.Drawing.Size(742, 600);
             this.playlistGrid.TabIndex = 4;
+            this.playlistGrid.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.playlistGrid_CellBeginEdit);
             this.playlistGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Playlist_CellDoubleClick);
-            this.playlistGrid.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.playlist_CellMouseClick);
-            this.playlistGrid.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.playlist_RowsRemoved);
-            this.playlistGrid.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.playlist_UserDeletingRow);
+            this.playlistGrid.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.playlistGrid_CellEndEdit);
+            this.playlistGrid.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.playlistGrid_CellMouseClick);
+            this.playlistGrid.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.playlistGrid_EditingControlShowing);
+            this.playlistGrid.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.playlistGrid_RowsRemoved);
+            this.playlistGrid.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.playlistGrid_SortCompare);
+            this.playlistGrid.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.playlistGrid_UserDeletingRow);
             // 
             // index
             // 
@@ -102,7 +105,6 @@
             this.index.Frozen = true;
             this.index.HeaderText = "#";
             this.index.Name = "index";
-            this.index.ReadOnly = true;
             this.index.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.index.Width = 50;
             // 

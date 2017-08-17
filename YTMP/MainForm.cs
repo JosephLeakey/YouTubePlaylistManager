@@ -87,6 +87,8 @@ namespace YTMP
 
         private int visibleCount;
 
+        private int originalIndex;
+
         private bool online;
 
         public Dictionary<string, object[]> playlist = new Dictionary<string, object[]>();
@@ -178,6 +180,15 @@ namespace YTMP
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+            if (e.ColumnIndex == 0)
+            {
+                playlistGrid.CurrentCell = playlistGrid.Rows[e.RowIndex].Cells[0];
+
+                playlistGrid.BeginEdit(true);
+
+                return;
+            }
+
             playlistGrid.ClearSelection();
 
             playlistGrid.Rows[e.RowIndex].Selected = true;
@@ -513,7 +524,7 @@ namespace YTMP
             }
         }
 
-        private void playlist_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void playlistGrid_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
@@ -523,7 +534,7 @@ namespace YTMP
             }
         }
 
-        private void playlist_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        private void playlistGrid_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
             DeletionPreparation();
         }
@@ -593,7 +604,7 @@ namespace YTMP
             }
         }
 
-        private void playlist_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
+        private void playlistGrid_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
             if (playlistGrid.SelectedRows.Count == 0)
             {
@@ -858,6 +869,68 @@ namespace YTMP
             {
                 shuffleToggleButton.Text = "Shuffle: OFF";
             }
+        }
+
+        private void playlistGrid_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            originalIndex = e.RowIndex;
+        }
+
+        private void playlistGrid_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            int index = int.Parse(playlistGrid.Rows[e.RowIndex].Cells[0].Value.ToString()) - 1;
+
+            if (index < 0)
+            {
+                index = 0;
+            }
+            else if (index >= playlist.Count)
+            {
+                index = playlist.Count - 1;
+            }
+
+            string cache = listing[originalIndex];
+
+            if (index > originalIndex)
+            {
+                for (int i = originalIndex + 1; i <= index; i++)
+                {
+                    listing[i - 1] = listing[i];
+
+                    playlistGrid.Rows[i].Cells[0].Value = i;
+                }
+            }
+            else
+            {
+                for (int i = originalIndex - 1; i >= index; i--)
+                {
+                    listing[i + 1] = listing[i];
+
+                    playlistGrid.Rows[i].Cells[0].Value = i + 2;
+                }
+            }
+
+            listing[index] = cache;
+
+            playlistGrid.Sort(playlistGrid.Columns[0], ListSortDirection.Ascending);
+        }
+
+        private void playlistGrid_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            e.Control.KeyPress -= CheckKeyPress;
+            e.Control.KeyPress += CheckKeyPress;
+        }
+
+        private void CheckKeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back && e.KeyChar != (char)Keys.Enter) { e.Handled = true; } else { e.Handled = false; }
+        }
+
+        private void playlistGrid_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        {
+            e.SortResult = int.Parse(e.CellValue1.ToString()).CompareTo(int.Parse(e.CellValue2.ToString()));
+
+            e.Handled = true;
         }
     }
 
