@@ -99,7 +99,7 @@ namespace YTMP
 
         public bool shuffle = false;
 
-        //private Stack<string> shuffleStack = new Stack<string>();
+        private List<int> shuffleQueue = new List<int>();
 
         public MainForm()
         {
@@ -636,18 +636,89 @@ namespace YTMP
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            if (framework.NextVideo(playlist, listing, ref current) != null)
+            if (!CheckYouTube(false, false))
             {
+                return;
+            }
+
+            ChangeVideo(true);
+        }
+
+        public void ChangeVideo(bool direction)
+        {
+            if (!shuffle)
+            {
+                if ((direction && framework.NextVideo(playlist, listing, ref current) != null) || (!direction && framework.PreviousVideo(playlist, listing, ref current) != null))
+                {
+                    shuffleQueue.Clear();
+
+                    PlayVideo(current);
+                }
+            }
+            else
+            {
+                int index;
+
+                int original = current;
+
+                if (shuffleQueue.Count >= playlist.Count)
+                {
+                    shuffleQueue.Clear();
+                    shuffleQueue.Add(current);
+
+                    index = 0;
+                }
+                else
+                {
+                    index = shuffleQueue.IndexOf(current);
+                }
+                
+                if ((direction && index < shuffleQueue.Count - 1) || (!direction && index > 0))
+                {
+                    if (direction)
+                    {
+                        current = shuffleQueue[index + 1];
+                    }
+                    else
+                    {
+                        current = shuffleQueue[index - 1];
+                    }
+                }
+                else if (framework.RandomVideo(playlist, listing, ref current) == null)
+                {
+                    return;
+                }
+                else
+                {
+                    while (current == original || shuffleQueue.Contains(current))
+                    {
+                        framework.RandomVideo(playlist, listing, ref current);
+                    }
+
+                    if (direction)
+                    {
+                        shuffleQueue.Add(current);
+                    }
+                    else
+                    {
+                        shuffleQueue.Insert(0, current);
+                    }
+                }
+
+                if (!listing.ContainsKey(original)) { shuffleQueue.Remove(original); }
+
                 PlayVideo(current);
             }
         }
 
         private void previousButton_Click(object sender, EventArgs e)
         {
-            if (framework.PreviousVideo(playlist, listing, ref current) != null)
+            if (!CheckYouTube(false, false))
             {
-                PlayVideo(current);
+                return;
             }
+
+            ChangeVideo(false);
         }
 
         private void videoNameLabel_Click(object sender, EventArgs e)
@@ -750,11 +821,11 @@ namespace YTMP
             if (shuffle)
             {
                 shuffleToggleButton.Text = "Shuffle: ON";
+
+                if (player.Visible) { shuffleQueue.Add(current); }
             }
             else
             {
-                //shuffleStack.Clear();
-
                 shuffleToggleButton.Text = "Shuffle: OFF";
             }
         }
@@ -781,11 +852,8 @@ namespace YTMP
 
                     return;
                 }
-                
-                if ((!form.shuffle && framework.NextVideo(form.playlist, form.listing, ref form.current) != null) || (form.shuffle && framework.RandomVideo(form.playlist, form.listing, ref form.current) != null))
-                {
-                    form.PlayVideo(form.current);
-                }
+
+                form.ChangeVideo(true);
             }
         }
     }
