@@ -189,6 +189,8 @@ namespace YTMP
                 return;
             }
 
+            shuffleQueue.Clear();
+
             current = e.RowIndex;
 
             PlayVideo(e.RowIndex);
@@ -547,7 +549,30 @@ namespace YTMP
                     playlist.Remove(listing[row.Index]);
                     listing.Remove(row.Index);
 
+                    if (shuffleQueue.Contains(row.Index))
+                    {
+                        shuffleQueue.Remove(row.Index);
+                    }
+
                     if (row.Index < deletionIndex) { deletionIndex = row.Index; }
+                }
+
+                for (int i = 0; i < shuffleQueue.Count; i++)
+                {
+                    if (shuffleQueue[i] > deletionIndex)
+                    {
+                        int displacement = 0;
+
+                        foreach (DataGridViewRow row in playlistGrid.SelectedRows)
+                        {
+                            if (shuffleQueue[i] > row.Index)
+                            {
+                                displacement += 1;
+                            }
+                        }
+                        
+                        shuffleQueue[i] -= displacement;
+                    }
                 }
 
                 visibleCount -= playlistGrid.SelectedRows.Count;
@@ -585,7 +610,7 @@ namespace YTMP
                     {
                         current = c;
 
-                        UpdateVideoNameTag(current);
+                        UpdateVideoNameTag(current + 1);
 
                         preservationID = null;
                     }
@@ -657,22 +682,31 @@ namespace YTMP
             }
             else
             {
-                int index;
+                if (shuffleQueue.Count == 0)
+                {
+                    shuffleQueue.Add(current);
+                }
+
+                int index = shuffleQueue.IndexOf(current);
 
                 int original = current;
 
-                if (shuffleQueue.Count >= playlist.Count)
+                if (shuffleQueue.Count >= playlist.Count && ((direction && index == shuffleQueue.Count - 1) || (!direction && index == 0)))
                 {
-                    shuffleQueue.Clear();
-                    shuffleQueue.Add(current);
+                    if (direction)
+                    {
+                        current = shuffleQueue[0];
+                    }
+                    else
+                    {
+                        current = shuffleQueue[shuffleQueue.Count - 1];
+                    }
 
-                    index = 0;
+                    PlayVideo(current);
+
+                    return;
                 }
-                else
-                {
-                    index = shuffleQueue.IndexOf(current);
-                }
-                
+
                 if ((direction && index < shuffleQueue.Count - 1) || (!direction && index > 0))
                 {
                     if (direction)
@@ -704,8 +738,6 @@ namespace YTMP
                         shuffleQueue.Insert(0, current);
                     }
                 }
-
-                if (!listing.ContainsKey(original)) { shuffleQueue.Remove(original); }
 
                 PlayVideo(current);
             }
@@ -821,8 +853,6 @@ namespace YTMP
             if (shuffle)
             {
                 shuffleToggleButton.Text = "Shuffle: ON";
-
-                if (player.Visible) { shuffleQueue.Add(current); }
             }
             else
             {
