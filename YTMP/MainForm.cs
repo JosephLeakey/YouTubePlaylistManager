@@ -984,6 +984,60 @@ namespace YTMP
             playlistGrid.Rows[index].Selected = true;
         }
 
+        private void SwapRows(int A, int B)
+        {
+            if (A == B) { return; }
+
+            if (A > B) { B += A; A = B - A; B -= A; }
+
+            if (A < 0) { A = 0; }
+
+            if (B >= playlist.Count) { B = playlist.Count - 1; }
+
+            playlistGrid.Rows[A].Cells[0].Value = B + 1;
+            playlistGrid.Rows[B].Cells[0].Value = A + 1;
+
+            if (current == A) { current = B; } else if (current == B) { current = A; }
+
+            if (current == A || current == B) { UpdateVideoNameTag(current + 1); }
+
+            string cache = listing[A];
+
+            listing[A] = listing[B];
+            listing[B] = cache;
+
+            bool AQueue = shuffleQueue.Contains(A);
+            bool BQueue = shuffleQueue.Contains(B);
+
+            if (!AQueue && !BQueue)
+            {
+                return;
+            }
+
+            if (AQueue && BQueue)
+            {
+                shuffleQueue[shuffleQueue.IndexOf(A)] = -1;
+                shuffleQueue[shuffleQueue.IndexOf(B)] = A;
+                shuffleQueue[shuffleQueue.IndexOf(-1)] = B;
+
+                return;
+            }
+
+            if (AQueue)
+            {
+                shuffleQueue[shuffleQueue.IndexOf(A)] = B;
+
+                return;
+            }
+
+            if (BQueue)
+            {
+                shuffleQueue[shuffleQueue.IndexOf(B)] = A;
+
+                return;
+            }
+        }
+
         private void playlistGrid_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
             e.Control.KeyPress -= CheckKeyPress;
