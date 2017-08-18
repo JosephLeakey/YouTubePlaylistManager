@@ -35,19 +35,22 @@
             // 
             // importButton
             // 
+            this.importButton.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.importButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.importButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.importButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.importButton.Location = new System.Drawing.Point(657, 14);
             this.importButton.Name = "importButton";
             this.importButton.Size = new System.Drawing.Size(99, 31);
             this.importButton.TabIndex = 9;
             this.importButton.Text = "Import";
-            this.importButton.UseVisualStyleBackColor = true;
+            this.importButton.UseVisualStyleBackColor = false;
             this.importButton.Visible = false;
             this.importButton.Click += new System.EventHandler(this.importButton_Click);
             // 
             // addressBox
             // 
+            this.addressBox.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.addressBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.addressBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.addressBox.ForeColor = System.Drawing.SystemColors.ControlDark;
@@ -65,6 +68,7 @@
             this.exportCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.exportCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.exportCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exportCheckBox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.exportCheckBox.Location = new System.Drawing.Point(620, 48);
             this.exportCheckBox.Name = "exportCheckBox";
             this.exportCheckBox.Size = new System.Drawing.Size(136, 17);
@@ -76,6 +80,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.ClientSize = new System.Drawing.Size(770, 76);
             this.Controls.Add(this.exportCheckBox);
             this.Controls.Add(this.importButton);

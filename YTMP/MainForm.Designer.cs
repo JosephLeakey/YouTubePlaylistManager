@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.playlistGrid = new System.Windows.Forms.DataGridView();
             this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -257,10 +258,11 @@
             // 
             // GuideButton
             // 
+            this.GuideButton.Enabled = false;
             this.GuideButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.GuideButton.Name = "GuideButton";
             this.GuideButton.Size = new System.Drawing.Size(152, 22);
-            this.GuideButton.Text = "Guide";
+            this.GuideButton.Text = "Guide [TBA]";
             // 
             // helpSeparator
             // 
@@ -273,6 +275,7 @@
             this.AboutButton.Name = "AboutButton";
             this.AboutButton.Size = new System.Drawing.Size(152, 22);
             this.AboutButton.Text = "About";
+            this.AboutButton.Click += new System.EventHandler(this.AboutButton_Click);
             // 
             // minMaxToggleButton
             // 
@@ -423,10 +426,11 @@
             this.Controls.Add(this.searchBox);
             this.Controls.Add(this.playlistGrid);
             this.Controls.Add(this.menuStrip);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MinimumSize = new System.Drawing.Size(1280, 720);
             this.Name = "MainForm";
-            this.Text = "YouTube Playlist Manager";
+            this.Text = "YouTube Playlist Manager [BETA]";
             this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.playlistGrid)).EndInit();
             this.menuStrip.ResumeLayout(false);

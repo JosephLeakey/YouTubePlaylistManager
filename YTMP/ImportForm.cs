@@ -14,7 +14,7 @@ namespace YTMP
     {
         private Framework framework;
 
-        private Dictionary<String, object> DJSON;
+        public Dictionary<String, object> DJSON;
 
         private const string addressBoxText = "Paste a YouTube playlist's URL in here to import it...";
 
@@ -64,6 +64,8 @@ namespace YTMP
 
         private void importButton_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.OK;
+
             this.Close();
         }
 
@@ -73,7 +75,7 @@ namespace YTMP
             {
                 addressBox.Clear();
                 addressBox.Font = new Font(addressBox.Font, FontStyle.Regular);
-                addressBox.ForeColor = SystemColors.WindowText;
+                addressBox.ForeColor = SystemColors.ControlLightLight;
             }
         }
 

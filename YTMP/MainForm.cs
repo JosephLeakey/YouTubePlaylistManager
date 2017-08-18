@@ -823,7 +823,27 @@ namespace YTMP
 
             ImportForm import = new ImportForm(framework);
 
-            import.ShowDialog();
+            if (import.ShowDialog() == DialogResult.OK)
+            {
+                /*
+                Dictionary<String, object> test = import.DJSON;
+
+                playlistGrid.Rows.Clear();
+
+                foreach (string entry in playlist.Keys)
+                {
+                    AddVideoToGrid(entry, playlist[entry], online);
+
+                    listing[playlistGrid.RowCount - 1] = entry;
+                }
+
+                visibleCount = playlistGrid.RowCount;
+
+                newPlaylistButton.Enabled = true;
+
+                ResetApplication();
+                */
+            }
         }
 
         public bool CheckYouTube(bool refresh, bool message)
@@ -1063,6 +1083,21 @@ namespace YTMP
             e.SortResult = int.Parse(e.CellValue1.ToString()).CompareTo(int.Parse(e.CellValue2.ToString()));
 
             e.Handled = true;
+        }
+
+        private void AboutButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("YouTube Playlist Manager\nBETA Version\n"
+                + "\nJoseph \"Seph\" Leakey developed this piece of junk to"
+                + "\ncover Google's arses because they forgot to write a playlist-"
+                + "\nmanagement tool that's worth a damn. Like, seriously:"
+                + "\nit can't even shuffle a playlist comprising more than 200"
+                + "\nvideos without throwing the surplus videos under the"
+                + "\nGoogleplex's shuttle-bus!\n"
+                + "\nYouTube Playlist Manager was made with the CefSharp"
+                + "\nwrapper (developed by the CefSharp community and"
+                + "\nmade available on the terms of the BSD license).",
+                "About YouTube Playlist Manager");
         }
     }
 
