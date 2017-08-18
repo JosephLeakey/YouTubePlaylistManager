@@ -73,6 +73,8 @@
             this.playlistGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.playlistGrid.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.playlistGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.playlistGrid.ColumnHeadersHeight = 25;
             this.playlistGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.playlistGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -82,6 +84,7 @@
             this.uploader,
             this.description,
             this.length});
+            this.playlistGrid.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
             this.playlistGrid.Location = new System.Drawing.Point(14, 67);
             this.playlistGrid.Name = "playlistGrid";
             this.playlistGrid.RowHeadersVisible = false;
@@ -152,6 +155,7 @@
             // 
             // menuStrip
             // 
+            this.menuStrip.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.playlistOptionsButton,
             this.autoPlayToggleButton,
@@ -160,9 +164,10 @@
             this.minMaxToggleButton});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
+            this.menuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
             this.menuStrip.Size = new System.Drawing.Size(1264, 24);
             this.menuStrip.TabIndex = 5;
-            this.menuStrip.Text = "menuStrip1";
+            this.menuStrip.Text = "Menu Strip";
             // 
             // playlistOptionsButton
             // 
@@ -173,6 +178,7 @@
             this.importURLButton,
             this.playlistOptionsSeparatorB,
             this.exportFileButton});
+            this.playlistOptionsButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.playlistOptionsButton.Name = "playlistOptionsButton";
             this.playlistOptionsButton.ShortcutKeyDisplayString = "";
             this.playlistOptionsButton.Size = new System.Drawing.Size(101, 20);
@@ -181,6 +187,7 @@
             // newPlaylistButton
             // 
             this.newPlaylistButton.Enabled = false;
+            this.newPlaylistButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.newPlaylistButton.Name = "newPlaylistButton";
             this.newPlaylistButton.Size = new System.Drawing.Size(172, 22);
             this.newPlaylistButton.Text = "New Playlist";
@@ -193,6 +200,7 @@
             // 
             // importFileButton
             // 
+            this.importFileButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.importFileButton.Name = "importFileButton";
             this.importFileButton.Size = new System.Drawing.Size(172, 22);
             this.importFileButton.Text = "Import from File...";
@@ -200,6 +208,7 @@
             // 
             // importURLButton
             // 
+            this.importURLButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.importURLButton.Name = "importURLButton";
             this.importURLButton.Size = new System.Drawing.Size(172, 22);
             this.importURLButton.Text = "Import from URL...";
@@ -213,6 +222,7 @@
             // exportFileButton
             // 
             this.exportFileButton.Enabled = false;
+            this.exportFileButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.exportFileButton.Name = "exportFileButton";
             this.exportFileButton.Size = new System.Drawing.Size(172, 22);
             this.exportFileButton.Text = "Export to File...";
@@ -220,6 +230,7 @@
             // 
             // autoPlayToggleButton
             // 
+            this.autoPlayToggleButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.autoPlayToggleButton.Name = "autoPlayToggleButton";
             this.autoPlayToggleButton.Size = new System.Drawing.Size(96, 20);
             this.autoPlayToggleButton.Text = "Auto-Play: ON";
@@ -227,6 +238,7 @@
             // 
             // shuffleToggleButton
             // 
+            this.shuffleToggleButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.shuffleToggleButton.Name = "shuffleToggleButton";
             this.shuffleToggleButton.Size = new System.Drawing.Size(83, 20);
             this.shuffleToggleButton.Text = "Shuffle: OFF";
@@ -238,30 +250,34 @@
             this.GuideButton,
             this.helpSeparator,
             this.AboutButton});
+            this.helpButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.helpButton.Name = "helpButton";
             this.helpButton.Size = new System.Drawing.Size(44, 20);
             this.helpButton.Text = "Help";
             // 
             // GuideButton
             // 
+            this.GuideButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.GuideButton.Name = "GuideButton";
-            this.GuideButton.Size = new System.Drawing.Size(107, 22);
+            this.GuideButton.Size = new System.Drawing.Size(152, 22);
             this.GuideButton.Text = "Guide";
             // 
             // helpSeparator
             // 
             this.helpSeparator.Name = "helpSeparator";
-            this.helpSeparator.Size = new System.Drawing.Size(104, 6);
+            this.helpSeparator.Size = new System.Drawing.Size(149, 6);
             // 
             // AboutButton
             // 
+            this.AboutButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.AboutButton.Name = "AboutButton";
-            this.AboutButton.Size = new System.Drawing.Size(107, 22);
+            this.AboutButton.Size = new System.Drawing.Size(152, 22);
             this.AboutButton.Text = "About";
             // 
             // minMaxToggleButton
             // 
             this.minMaxToggleButton.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.minMaxToggleButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.minMaxToggleButton.Name = "minMaxToggleButton";
             this.minMaxToggleButton.Size = new System.Drawing.Size(104, 20);
             this.minMaxToggleButton.Text = "Maximise Player";
@@ -277,6 +293,7 @@
             // 
             this.searchBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchBox.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.searchBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.searchBox.ForeColor = System.Drawing.SystemColors.ControlDark;
@@ -291,14 +308,16 @@
             // addButton
             // 
             this.addButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.addButton.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.addButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.addButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.addButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.addButton.Location = new System.Drawing.Point(657, 31);
             this.addButton.Name = "addButton";
             this.addButton.Size = new System.Drawing.Size(99, 31);
             this.addButton.TabIndex = 7;
             this.addButton.Text = "Add";
-            this.addButton.UseVisualStyleBackColor = true;
+            this.addButton.UseVisualStyleBackColor = false;
             this.addButton.Visible = false;
             this.addButton.Click += new System.EventHandler(this.AddButton_Click);
             // 
@@ -307,6 +326,7 @@
             this.videoNameLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.videoNameLabel.AutoSize = true;
             this.videoNameLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.videoNameLabel.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.videoNameLabel.Location = new System.Drawing.Point(763, 308);
             this.videoNameLabel.MaximumSize = new System.Drawing.Size(480, 0);
             this.videoNameLabel.Name = "videoNameLabel";
@@ -332,6 +352,7 @@
             this.videoUploaderLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.videoUploaderLabel.AutoSize = true;
             this.videoUploaderLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.videoUploaderLabel.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.videoUploaderLabel.Location = new System.Drawing.Point(766, 345);
             this.videoUploaderLabel.Name = "videoUploaderLabel";
             this.videoUploaderLabel.Size = new System.Drawing.Size(0, 20);
@@ -342,8 +363,10 @@
             // 
             this.videoDescriptionBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.videoDescriptionBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.videoDescriptionBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.videoDescriptionBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.videoDescriptionBox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.videoDescriptionBox.Location = new System.Drawing.Point(770, 380);
             this.videoDescriptionBox.Multiline = true;
             this.videoDescriptionBox.Name = "videoDescriptionBox";
@@ -356,28 +379,32 @@
             // previousButton
             // 
             this.previousButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.previousButton.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.previousButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.previousButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.previousButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.previousButton.Location = new System.Drawing.Point(770, 636);
             this.previousButton.Name = "previousButton";
             this.previousButton.Size = new System.Drawing.Size(237, 31);
             this.previousButton.TabIndex = 12;
             this.previousButton.Text = "◀  Previous Video";
-            this.previousButton.UseVisualStyleBackColor = true;
+            this.previousButton.UseVisualStyleBackColor = false;
             this.previousButton.Visible = false;
             this.previousButton.Click += new System.EventHandler(this.previousButton_Click);
             // 
             // nextButton
             // 
             this.nextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.nextButton.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.nextButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.nextButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.nextButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.nextButton.Location = new System.Drawing.Point(1013, 636);
             this.nextButton.Name = "nextButton";
             this.nextButton.Size = new System.Drawing.Size(237, 31);
             this.nextButton.TabIndex = 13;
             this.nextButton.Text = "Next Video  ▶";
-            this.nextButton.UseVisualStyleBackColor = true;
+            this.nextButton.UseVisualStyleBackColor = false;
             this.nextButton.Visible = false;
             this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
             // 
@@ -385,7 +412,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.Control;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.ClientSize = new System.Drawing.Size(1264, 681);
             this.Controls.Add(this.nextButton);
             this.Controls.Add(this.previousButton);

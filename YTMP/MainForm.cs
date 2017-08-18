@@ -108,6 +108,8 @@ namespace YTMP
             InitializeComponent();
 
             InitializeBrowser();
+
+            Application.EnableVisualStyles();
         }
 
         private void InitializeBrowser()
@@ -130,6 +132,13 @@ namespace YTMP
         //Executed when the form is loaded
         private void MainForm_Load(object sender, EventArgs e)
         {
+            menuStrip.Renderer = new ToolStripProfessionalRenderer(new ColorTable());
+
+            foreach (ToolStripMenuItem menuItem in menuStrip.Items)
+            {
+                ((ToolStripDropDownMenu)menuItem.DropDown).ShowImageMargin = false;
+            }
+
             //Display placeholder text within the search-bar
             searchBox.Text = searchBoxText;
 
@@ -261,7 +270,7 @@ namespace YTMP
 
             string search = GetSearchText();
 
-            if (framework.VideoExists(search.Substring(search.Length - 11)))
+            if (search.Length < 10 || framework.VideoExists(search.Substring(search.Length - 11)))
             {
                 SetSearchBar(2);
             }
@@ -454,7 +463,7 @@ namespace YTMP
             {
                 searchBox.Clear();
                 searchBox.Font = new Font(searchBox.Font, FontStyle.Regular);
-                searchBox.ForeColor = SystemColors.WindowText;
+                searchBox.ForeColor = SystemColors.ControlLightLight;
             }
         }
 
@@ -1081,6 +1090,51 @@ namespace YTMP
 
                 form.ChangeVideo(true);
             }
+        }
+    }
+
+    public class ColorTable : ProfessionalColorTable
+    {
+        private Color BackColor = Color.FromArgb(60, 60, 60);
+
+        public override Color MenuItemSelected
+        {
+            get { return BackColor; }
+        }
+
+        public override Color MenuItemBorder
+        {
+            get { return SystemColors.ControlLightLight; }
+        }
+
+        public override Color MenuBorder
+        {
+            get { return SystemColors.ControlLightLight; }
+        }
+
+        public override Color MenuItemSelectedGradientBegin
+        {
+            get { return BackColor; }
+        }
+
+        public override Color MenuItemSelectedGradientEnd
+        {
+            get { return BackColor; }
+        }
+
+        public override Color MenuItemPressedGradientBegin
+        {
+            get { return BackColor; }
+        }
+
+        public override Color MenuItemPressedGradientEnd
+        {
+            get { return BackColor; }
+        }
+
+        public override Color ToolStripDropDownBackground
+        {
+            get { return BackColor; }
         }
     }
 }
