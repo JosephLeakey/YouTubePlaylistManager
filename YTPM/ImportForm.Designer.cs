@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ImportForm));
             this.importButton = new System.Windows.Forms.Button();
             this.addressBox = new System.Windows.Forms.TextBox();
             this.exportCheckBox = new System.Windows.Forms.CheckBox();
@@ -86,6 +87,7 @@
             this.Controls.Add(this.importButton);
             this.Controls.Add(this.addressBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ImportForm";
