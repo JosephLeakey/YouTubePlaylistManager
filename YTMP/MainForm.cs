@@ -87,8 +87,6 @@ namespace YTMP
 
         private int visibleCount;
 
-        private int originalIndex;
-
         private bool online;
 
         public Dictionary<string, object[]> playlist = new Dictionary<string, object[]>();
@@ -180,6 +178,10 @@ namespace YTMP
 
         private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+            playlistGrid.ClearSelection();
+
+            playlistGrid.Rows[e.RowIndex].Selected = true;
+
             if (e.ColumnIndex == 0)
             {
                 playlistGrid.CurrentCell = playlistGrid.Rows[e.RowIndex].Cells[0];
@@ -188,10 +190,6 @@ namespace YTMP
 
                 return;
             }
-
-            playlistGrid.ClearSelection();
-
-            playlistGrid.Rows[e.RowIndex].Selected = true;
 
             if (!CheckYouTube(false, true))
             {
@@ -391,17 +389,11 @@ namespace YTMP
                     time = time % 3600;
                 }
 
-                if (time / 60 > 0)
-                {
-                    timeString += string.Format("{0:00}", time / 60) + ":";
+                timeString += string.Format("{0:00}", time / 60) + ":";
 
-                    time = time % 60;
-                }
+                time = time % 60;
 
-                if (time > 0)
-                {
-                    timeString += string.Format("{0:00}", time);
-                }
+                timeString += string.Format("{0:00}", time);
 
                 playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], timeString);
             }
@@ -637,8 +629,7 @@ namespace YTMP
                     {
                         SetSearchBar(0);
                     }
-
-                    Search();
+                    else { Search(); }
                 }
 
                 newPlaylistButton.Enabled = (playlistGrid.RowCount > 0 || player.Visible);
@@ -871,15 +862,15 @@ namespace YTMP
             }
         }
 
-        private void playlistGrid_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            originalIndex = e.RowIndex;
-        }
-
         private void playlistGrid_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            int index = int.Parse(playlistGrid.Rows[e.RowIndex].Cells[0].Value.ToString()) - 1;
+            if (playlistGrid.Rows[e.RowIndex].Cells[0].Value == null) { playlistGrid.Rows[e.RowIndex].Cells[0].Value = e.RowIndex + 1; return; }
 
+            MoveRow(e.RowIndex, int.Parse(playlistGrid.Rows[e.RowIndex].Cells[0].Value.ToString()) - 1);
+        }
+
+        private void MoveRow(int selected, int index)
+        {
             if (index < 0)
             {
                 index = 0;
@@ -889,30 +880,108 @@ namespace YTMP
                 index = playlist.Count - 1;
             }
 
-            string cache = listing[originalIndex];
+            if (index == selected) { return; }
 
-            if (index > originalIndex)
+            if (shuffleQueue.Contains(selected)) { shuffleQueue[shuffleQueue.IndexOf(selected)] = -1; }
+
+            if (selected == current)
             {
-                for (int i = originalIndex + 1; i <= index; i++)
+                current = index;
+
+                if (player.Visible) { UpdateVideoNameTag(current + 1); }
+            }
+            else if (index > selected && current > selected && current <= index)
+            {
+                current -= 1;
+
+                if (player.Visible) { UpdateVideoNameTag(current + 1); }
+            }
+            else if (index < selected && current < selected && current >= index)
+            {
+                current += 1;
+
+                if (player.Visible) { UpdateVideoNameTag(current + 1); }
+            }
+
+            string cache = listing[selected];
+
+            if (index > selected)
+            {
+                for (int i = selected + 1; i <= index; i++)
                 {
                     listing[i - 1] = listing[i];
 
                     playlistGrid.Rows[i].Cells[0].Value = i;
+
+                    if (shuffleQueue.Contains(i)) { shuffleQueue[shuffleQueue.IndexOf(i)] -= 1; }
                 }
             }
             else
             {
-                for (int i = originalIndex - 1; i >= index; i--)
+                for (int i = selected - 1; i >= index; i--)
                 {
                     listing[i + 1] = listing[i];
 
                     playlistGrid.Rows[i].Cells[0].Value = i + 2;
+
+                    if (shuffleQueue.Contains(i)) { shuffleQueue[shuffleQueue.IndexOf(i)] += 1; }
                 }
             }
 
-            listing[index] = cache;
+            playlistGrid.Rows[selected].Cells[0].Value = index + 1;
 
+            if (shuffleQueue.Contains(-1)) { shuffleQueue[shuffleQueue.IndexOf(-1)] = index; }
+
+            listing[index] = cache;
+            
             playlistGrid.Sort(playlistGrid.Columns[0], ListSortDirection.Ascending);
+
+            if (searchBox.ForeColor != SystemColors.ControlDark && searchBox.TextLength > 0)
+            {
+                string search = GetSearchText();
+                
+                bool visible = false;
+
+                if (search == playlistGrid.Rows[index].Cells[0].Value.ToString()) { visible = true; }
+
+                if (!visible)
+                {
+                    if (search.Length > 10 && search.Substring(search.Length - 11) == playlistGrid.Rows[index].Cells[1].Value.ToString()) { visible = true; }
+
+                    if (!visible)
+                    {
+                        search = search.ToLower();
+
+                        for (int i = 2; i < 4; i++)
+                        {
+                            if (!visible && i != 1 && playlistGrid.Rows[index].Cells[i].Value.ToString().ToLower().Contains(search))
+                            {
+                                visible = true;
+                            }
+                        }
+
+                        if (!visible)
+                        {
+                            visibleCount -= 1;
+
+                            if (visibleCount == 0)
+                            {
+                                SetSearchBar(0);
+                            }
+                            else
+                            {
+                                playlistGrid.Rows[index].Visible = false;
+
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            playlistGrid.ClearSelection();
+
+            playlistGrid.Rows[index].Selected = true;
         }
 
         private void playlistGrid_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)

@@ -90,7 +90,6 @@
             this.playlistGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.playlistGrid.Size = new System.Drawing.Size(742, 600);
             this.playlistGrid.TabIndex = 4;
-            this.playlistGrid.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.playlistGrid_CellBeginEdit);
             this.playlistGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Playlist_CellDoubleClick);
             this.playlistGrid.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.playlistGrid_CellEndEdit);
             this.playlistGrid.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.playlistGrid_CellMouseClick);
