@@ -53,7 +53,7 @@ namespace YTMP
                     }
                     else
                     {
-                        DJSON = serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/playlistItems?key=" + API + "&part=snippet,contentDetails&playlistId=" + ID));
+                        DJSON = serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/playlistItems?key=" + API + "&part=contentDetails&playlistId=" + ID));
                     }
 
                     return DJSON;
@@ -125,6 +125,55 @@ namespace YTMP
             details[3] = time;
 
             return details;
+        }
+        
+        public List<string> CompilePlaylistVideos(string ID)
+        {
+            if (ID.Length < playlistIDLength)
+            {
+                return null;
+            }
+
+            Dictionary<string, object> DJSON = GetDJSON(ID, true);
+
+            if (DJSON == null)
+            {
+                return null;
+            }
+
+            List<string> videos = new List<string>();
+
+            do
+            {
+                string next = null;
+
+                if (DJSON.ContainsKey("nextPageToken"))
+                {
+                    next = (string)DJSON["nextPageToken"];
+                }
+
+                ArrayList partial = (ArrayList)DJSON["items"];
+
+                for (int i = 0; i < partial.Count; i++)
+                {
+                    dynamic item = partial[i];
+
+                    item = item["contentDetails"];
+
+                    videos.Add(item["videoId"]);
+                }
+
+                if (next != null)
+                {
+                    DJSON = GetDJSON(ID + "&pageToken=" + next, true);
+                }
+                else
+                {
+                    DJSON = null;
+                }
+            } while (DJSON != null);
+
+            return videos;
         }
 
         public object[] GetVideoDetails(string ID)
@@ -224,8 +273,6 @@ namespace YTMP
         {
             string line, ID;
 
-            playlist.Clear();
-
             bool available = YouTubeAvailable(true);
 
             using (System.IO.StreamReader SR = new System.IO.StreamReader(fileName))
@@ -238,7 +285,7 @@ namespace YTMP
 
                         if (available)
                         {
-                            if (GetDJSON(ID, false) != null)
+                            if (VideoExists(ID))
                             {
                                 playlist[ID] = (object[])GetVideoDetails(ID)[1];
                             }

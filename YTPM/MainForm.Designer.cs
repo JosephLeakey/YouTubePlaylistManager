@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.playlistGrid = new System.Windows.Forms.DataGridView();
             this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -76,6 +78,16 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.playlistGrid.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
             this.playlistGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.playlistGrid.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
+            this.playlistGrid.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.playlistGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.playlistGrid.ColumnHeadersHeight = 25;
             this.playlistGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.playlistGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -85,6 +97,15 @@
             this.uploader,
             this.description,
             this.length});
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.ControlLightLight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.playlistGrid.DefaultCellStyle = dataGridViewCellStyle2;
+            this.playlistGrid.EnableHeadersVisualStyles = false;
             this.playlistGrid.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
             this.playlistGrid.Location = new System.Drawing.Point(14, 67);
             this.playlistGrid.Name = "playlistGrid";
@@ -261,19 +282,19 @@
             this.GuideButton.Enabled = false;
             this.GuideButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.GuideButton.Name = "GuideButton";
-            this.GuideButton.Size = new System.Drawing.Size(152, 22);
+            this.GuideButton.Size = new System.Drawing.Size(138, 22);
             this.GuideButton.Text = "Guide [TBA]";
             // 
             // helpSeparator
             // 
             this.helpSeparator.Name = "helpSeparator";
-            this.helpSeparator.Size = new System.Drawing.Size(149, 6);
+            this.helpSeparator.Size = new System.Drawing.Size(135, 6);
             // 
             // AboutButton
             // 
             this.AboutButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.AboutButton.Name = "AboutButton";
-            this.AboutButton.Size = new System.Drawing.Size(152, 22);
+            this.AboutButton.Size = new System.Drawing.Size(138, 22);
             this.AboutButton.Text = "About";
             this.AboutButton.Click += new System.EventHandler(this.AboutButton_Click);
             // 
@@ -300,7 +321,7 @@
             this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.searchBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.searchBox.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.searchBox.Location = new System.Drawing.Point(14, 31);
+            this.searchBox.Location = new System.Drawing.Point(14, 30);
             this.searchBox.Name = "searchBox";
             this.searchBox.Size = new System.Drawing.Size(742, 31);
             this.searchBox.TabIndex = 6;
@@ -315,7 +336,7 @@
             this.addButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.addButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
             this.addButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.addButton.Location = new System.Drawing.Point(657, 31);
+            this.addButton.Location = new System.Drawing.Point(657, 30);
             this.addButton.Name = "addButton";
             this.addButton.Size = new System.Drawing.Size(99, 31);
             this.addButton.TabIndex = 7;
@@ -330,7 +351,7 @@
             this.videoNameLabel.AutoSize = true;
             this.videoNameLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.videoNameLabel.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.videoNameLabel.Location = new System.Drawing.Point(763, 308);
+            this.videoNameLabel.Location = new System.Drawing.Point(763, 306);
             this.videoNameLabel.MaximumSize = new System.Drawing.Size(480, 0);
             this.videoNameLabel.Name = "videoNameLabel";
             this.videoNameLabel.Size = new System.Drawing.Size(0, 37);
@@ -356,7 +377,7 @@
             this.videoUploaderLabel.AutoSize = true;
             this.videoUploaderLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.videoUploaderLabel.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.videoUploaderLabel.Location = new System.Drawing.Point(766, 345);
+            this.videoUploaderLabel.Location = new System.Drawing.Point(766, 343);
             this.videoUploaderLabel.Name = "videoUploaderLabel";
             this.videoUploaderLabel.Size = new System.Drawing.Size(0, 20);
             this.videoUploaderLabel.TabIndex = 10;
@@ -370,12 +391,12 @@
             this.videoDescriptionBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.videoDescriptionBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.videoDescriptionBox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.videoDescriptionBox.Location = new System.Drawing.Point(770, 380);
+            this.videoDescriptionBox.Location = new System.Drawing.Point(770, 371);
             this.videoDescriptionBox.Multiline = true;
             this.videoDescriptionBox.Name = "videoDescriptionBox";
             this.videoDescriptionBox.ReadOnly = true;
             this.videoDescriptionBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.videoDescriptionBox.Size = new System.Drawing.Size(480, 251);
+            this.videoDescriptionBox.Size = new System.Drawing.Size(480, 259);
             this.videoDescriptionBox.TabIndex = 11;
             this.videoDescriptionBox.Visible = false;
             // 

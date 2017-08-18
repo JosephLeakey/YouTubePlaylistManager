@@ -14,7 +14,7 @@ namespace YTMP
     {
         private Framework framework;
 
-        public Dictionary<String, object> DJSON;
+        private Dictionary<String, object> DJSON;
 
         private const string addressBoxText = "Paste a YouTube playlist's URL in here to import it...";
 
@@ -25,37 +25,35 @@ namespace YTMP
             this.framework = framework;
         }
 
-        private string GetAddress()
+        public string GetID()
         {
-            string address = addressBox.Text;
+            if (addressBox.ForeColor == SystemColors.ControlDark || addressBox.TextLength < 34) { return null; }
 
-            while (address.Length > 34 && address[address.Length - 1] == char.Parse("/"))
+            string ID = addressBox.Text;
+
+            while (ID.Length > 34 && ID[ID.Length - 1] == char.Parse("/"))
             {
-                address = address.Substring(0, address.Length - 1);
+                ID = ID.Substring(0, ID.Length - 1);
             }
 
-            return address;
+            ID = ID.Substring(ID.Length - 34);
+
+            return ID;
+        }
+
+        public bool GetCheckState()
+        {
+            return exportCheckBox.Checked;
         }
 
         private void addressBox_TextChanged(object sender, EventArgs e)
         {
-            string address = GetAddress();
-
-            if (address.Length > 33)
-            {
-                DJSON = framework.GetDJSON(address.Substring(address.Length - 34), true);
-            }
-            else
-            {
-                DJSON = null;
-            }
-
-            if (DJSON != null && !importButton.Visible)
+            if (GetID() != null && !importButton.Visible)
             {
                 addressBox.Size = new Size(addressBox.Size.Width - 104, addressBox.Size.Height);
                 importButton.Visible = true;
             }
-            else if (DJSON == null && importButton.Visible)
+            else if (importButton.Visible)
             {
                 importButton.Visible = false;
                 addressBox.Size = new Size(addressBox.Size.Width + 104, addressBox.Size.Height);

@@ -89,6 +89,8 @@ namespace YTMP
 
         private bool online;
 
+        private DataGridViewCellStyle numberCellStyle;
+
         public Dictionary<string, object[]> playlist = new Dictionary<string, object[]>();
 
         public Dictionary<int, string> listing = new Dictionary<int, string>();
@@ -107,18 +109,18 @@ namespace YTMP
 
             InitializeComponent();
 
-            InitializeBrowser();
+            InitializePlayer(ref player);
 
-            Application.EnableVisualStyles();
+            numberCellStyle = NumberCellStyle();
         }
 
-        private void InitializeBrowser()
+        private void InitializePlayer(ref ChromiumWebBrowser player)
         {
             Cef.Initialize(new CefSettings());
 
             player = new ChromiumWebBrowser(string.Empty);
             player.Size = new Size(480, 270);
-            player.Location = new Point(770, 31);
+            player.Location = new Point(770, 30);
             player.BackColor = Color.Black;
             player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
 
@@ -127,6 +129,16 @@ namespace YTMP
 
             this.Controls.Add(player);
             player.BringToFront();
+        }
+
+        private DataGridViewCellStyle NumberCellStyle()
+        {
+            DataGridViewCellStyle style = new DataGridViewCellStyle();
+
+            style.BackColor = SystemColors.ControlDark;
+            style.ForeColor = SystemColors.ControlLightLight;
+
+            return style;
         }
 
         //Executed when the form is loaded
@@ -167,7 +179,7 @@ namespace YTMP
                     searchBox.Size = new Size(playlistGrid.Size.Width, searchBox.Size.Height);
                     break;
                 case (2):
-                    searchBox.Size = new Size(playlistGrid.Size.Width - 104, searchBox.Size.Height);
+                    searchBox.Size = new Size(playlistGrid.Size.Width - 105, searchBox.Size.Height);
                     addButton.Visible = true;
                     break;
             }
@@ -262,11 +274,11 @@ namespace YTMP
             }
         }
 
-        private void ResetApplication()
+        private void ResetApplication(bool export)
         {
             SetFullView(false);
 
-            exportFileButton.Enabled = false;
+            exportFileButton.Enabled = export;
 
             string search = GetSearchText();
 
@@ -411,6 +423,8 @@ namespace YTMP
                 playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], details[3]);
             }
 
+            playlistGrid.Rows[playlistGrid.RowCount - 1].Cells[0].Style = numberCellStyle;
+
             listing[playlistGrid.RowCount - 1] = ID;
         }
 
@@ -506,9 +520,15 @@ namespace YTMP
 
             if (loadFileDialog.ShowDialog() == DialogResult.OK)
             {
-                online = framework.Import(playlist, loadFileDialog.FileName);
+                ResetApplication(false);
+
+                playlist.Clear();
+
+                listing.Clear();
 
                 playlistGrid.Rows.Clear();
+
+                online = framework.Import(playlist, loadFileDialog.FileName);
 
                 foreach (string entry in playlist.Keys)
                 {
@@ -520,8 +540,6 @@ namespace YTMP
                 visibleCount = playlistGrid.RowCount;
 
                 newPlaylistButton.Enabled = true;
-
-                ResetApplication();
             }
         }
 
@@ -667,7 +685,7 @@ namespace YTMP
 
             visibleCount = 0;
 
-            ResetApplication();
+            ResetApplication(false);
         }
 
         private void nextButton_Click(object sender, EventArgs e)
@@ -810,8 +828,8 @@ namespace YTMP
         private void UpdateUIElements()
         {
             videoUploaderLabel.Location = new Point(videoUploaderLabel.Location.X, videoNameLabel.Location.Y + videoNameLabel.Size.Height);
-            videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 15);
-            videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 5);
+            videoDescriptionBox.Location = new Point(videoDescriptionBox.Location.X, videoUploaderLabel.Location.Y + videoUploaderLabel.Size.Height + 8);
+            videoDescriptionBox.Size = new Size(videoDescriptionBox.Size.Width, previousButton.Location.Y - videoDescriptionBox.Location.Y - 6);
         }
 
         private void importURLButton_Click(object sender, EventArgs e)
@@ -825,24 +843,30 @@ namespace YTMP
 
             if (import.ShowDialog() == DialogResult.OK)
             {
-                /*
-                Dictionary<String, object> test = import.DJSON;
+                ResetApplication(true);
+
+                playlist.Clear();
+
+                listing.Clear();
 
                 playlistGrid.Rows.Clear();
 
-                foreach (string entry in playlist.Keys)
-                {
-                    AddVideoToGrid(entry, playlist[entry], online);
+                List<string> videos = framework.CompilePlaylistVideos(import.GetID());
 
-                    listing[playlistGrid.RowCount - 1] = entry;
+                for (int i = 0; i < videos.Count; i++)
+                {
+                    playlist[videos[i]] = (object[])framework.GetVideoDetails(videos[i])[1];
+
+                    AddVideoToGrid(videos[i], playlist[videos[i]], online);
+
+                    listing[playlistGrid.RowCount - 1] = videos[i];
                 }
 
                 visibleCount = playlistGrid.RowCount;
 
                 newPlaylistButton.Enabled = true;
 
-                ResetApplication();
-                */
+                if (import.GetCheckState()) { Export(); }
             }
         }
 

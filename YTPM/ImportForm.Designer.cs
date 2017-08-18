@@ -101,7 +101,7 @@
         #endregion
 
         private System.Windows.Forms.Button importButton;
-        private System.Windows.Forms.TextBox addressBox;
         private System.Windows.Forms.CheckBox exportCheckBox;
+        private System.Windows.Forms.TextBox addressBox;
     }
 }
