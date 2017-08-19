@@ -181,6 +181,40 @@ namespace YTPM
             }
         }
 
+        public int[] Search(string text)
+        {
+            if (text == null || text == String.Empty)
+            {
+                return new int[0];
+            }
+
+            List<int> results = new List<int>();
+
+            int parse;
+
+            if (int.TryParse(text, out parse))
+            {
+                if (parse > 0 && parse <= RowCount) { results.Add(parse - 1); }
+            }
+
+            foreach (DataGridViewRow row in Rows)
+            {
+                if (!results.Contains(row.Index))
+                {
+                    if (text == row.Cells[1].Value.ToString()) { results.Add(row.Index); continue; }
+
+                    text = text.ToLower();
+
+                    for (int i = 2; i < 4; i++)
+                    {
+                        if (row.Cells[i].Value.ToString().ToLower().Contains(text)) { results.Add(row.Index); break; }
+                    }
+                }
+            }
+
+            if (results.Count > 0) { return results.ToArray(); } else { return new int[0]; }
+        }
+
         private void PlaylistGrid_MouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
