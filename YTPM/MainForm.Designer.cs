@@ -28,16 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.playlistGrid = new System.Windows.Forms.DataGridView();
-            this.index = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.videoName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.uploader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.description = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.length = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.playlistOptionsButton = new System.Windows.Forms.ToolStripMenuItem();
             this.newPlaylistButton = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,109 +55,8 @@
             this.previousButton = new System.Windows.Forms.Button();
             this.nextButton = new System.Windows.Forms.Button();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
-            ((System.ComponentModel.ISupportInitialize)(this.playlistGrid)).BeginInit();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // playlistGrid
-            // 
-            this.playlistGrid.AllowUserToAddRows = false;
-            this.playlistGrid.AllowUserToResizeColumns = false;
-            this.playlistGrid.AllowUserToResizeRows = false;
-            this.playlistGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.playlistGrid.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
-            this.playlistGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.playlistGrid.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
-            this.playlistGrid.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.playlistGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.playlistGrid.ColumnHeadersHeight = 25;
-            this.playlistGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            this.playlistGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.index,
-            this.ID,
-            this.videoName,
-            this.uploader,
-            this.description,
-            this.length});
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.ControlLightLight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.playlistGrid.DefaultCellStyle = dataGridViewCellStyle2;
-            this.playlistGrid.EnableHeadersVisualStyles = false;
-            this.playlistGrid.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
-            this.playlistGrid.Location = new System.Drawing.Point(14, 67);
-            this.playlistGrid.Name = "playlistGrid";
-            this.playlistGrid.RowHeadersVisible = false;
-            this.playlistGrid.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            this.playlistGrid.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.playlistGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.playlistGrid.Size = new System.Drawing.Size(742, 600);
-            this.playlistGrid.TabIndex = 4;
-            // 
-            // index
-            // 
-            this.index.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.index.Frozen = true;
-            this.index.HeaderText = "#";
-            this.index.Name = "index";
-            this.index.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.index.Width = 50;
-            // 
-            // ID
-            // 
-            this.ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.ID.HeaderText = "ID";
-            this.ID.Name = "ID";
-            this.ID.ReadOnly = true;
-            this.ID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ID.Visible = false;
-            // 
-            // videoName
-            // 
-            this.videoName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.videoName.HeaderText = "Name";
-            this.videoName.Name = "videoName";
-            this.videoName.ReadOnly = true;
-            this.videoName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // uploader
-            // 
-            this.uploader.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.uploader.HeaderText = "Uploader";
-            this.uploader.Name = "uploader";
-            this.uploader.ReadOnly = true;
-            this.uploader.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.uploader.Width = 200;
-            // 
-            // description
-            // 
-            this.description.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.description.HeaderText = "Description";
-            this.description.Name = "description";
-            this.description.ReadOnly = true;
-            this.description.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.description.Visible = false;
-            // 
-            // length
-            // 
-            this.length.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.length.HeaderText = "Length";
-            this.length.Name = "length";
-            this.length.ReadOnly = true;
-            this.length.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // menuStrip
             // 
@@ -438,7 +328,6 @@
             this.Controls.Add(this.videoNameLabel);
             this.Controls.Add(this.addButton);
             this.Controls.Add(this.searchBox);
-            this.Controls.Add(this.playlistGrid);
             this.Controls.Add(this.menuStrip);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
@@ -446,7 +335,6 @@
             this.Name = "MainForm";
             this.Text = "YouTube Playlist Manager [BETA]";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.playlistGrid)).EndInit();
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
@@ -455,7 +343,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.DataGridView playlistGrid;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem playlistOptionsButton;
         private System.Windows.Forms.ToolStripMenuItem importFileButton;
@@ -482,12 +369,6 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker;
         public System.Windows.Forms.SaveFileDialog saveFileDialog;
         public System.Windows.Forms.OpenFileDialog loadFileDialog;
-        private System.Windows.Forms.DataGridViewTextBoxColumn index;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ID;
-        private System.Windows.Forms.DataGridViewTextBoxColumn videoName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn uploader;
-        private System.Windows.Forms.DataGridViewTextBoxColumn description;
-        private System.Windows.Forms.DataGridViewTextBoxColumn length;
     }
 }
 

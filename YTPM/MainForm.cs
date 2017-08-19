@@ -24,7 +24,7 @@ namespace YTMP
     {
         private Framework framework;
 
-        private PlaylistGrid playlistGrid2;
+        private PlaylistGrid playlistGrid;
 
         private Player player;
 
@@ -46,7 +46,7 @@ namespace YTMP
 
             InitializeComponent();
 
-            InitializePlaylistGrid(playlistGrid2);
+            InitializePlaylistGrid(ref playlistGrid);
 
             InitializePlayer(ref player);
         }
@@ -54,6 +54,25 @@ namespace YTMP
         private void InitializePlaylistGrid(ref PlaylistGrid playlistGrid)
         {
             playlistGrid = new PlaylistGrid();
+
+            playlistGrid.BackgroundColor = Color.FromArgb(40, 40, 40);
+            playlistGrid.GridColor = Color.FromArgb(40, 40, 40);
+
+            playlistGrid.BorderStyle = BorderStyle.Fixed3D;
+
+            playlistGrid.EnableHeadersVisualStyles = false;
+
+            playlistGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            playlistGrid.ColumnHeadersDefaultCellStyle.BackColor = SystemColors.ControlDark;
+            playlistGrid.ColumnHeadersDefaultCellStyle.ForeColor = SystemColors.ControlLightLight;
+            playlistGrid.ColumnHeadersDefaultCellStyle.Font = new Font(playlistGrid.ColumnHeadersDefaultCellStyle.Font, FontStyle.Bold);
+
+            playlistGrid.DefaultCellStyle.BackColor = SystemColors.Control;
+            playlistGrid.DefaultCellStyle.ForeColor = SystemColors.ControlText;
+            playlistGrid.DefaultCellStyle.SelectionBackColor = SystemColors.ControlLightLight;
+            playlistGrid.DefaultCellStyle.SelectionForeColor = SystemColors.ControlText;
+
+            playlistGrid.Anchor = (AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right);
 
             playlistGrid.Size = new Size(742, 600);
             playlistGrid.Location = new Point(14, 67);
@@ -190,7 +209,7 @@ namespace YTMP
         {
             SetFullView(false);
 
-            playlistGrid2.Reset();
+            playlistGrid.Reset();
 
             exportFileButton.Enabled = export;
 
@@ -210,14 +229,14 @@ namespace YTMP
 
         public void PlayVideo(int index)
         {
-            if (!framework.VideoExists(playlistGrid2.GetID(index)))
+            if (!framework.VideoExists(playlistGrid.GetID(index)))
             {
                 MessageBox.Show("This video could not be loaded.\n\nPlease check your internet connection\nand make sure that the video still exists.", "Unable to Load Video", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 return;
             }
 
-            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + playlistGrid2.GetID(index) + @""")");
+            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + playlistGrid.GetID(index) + @""")");
 
             if (InvokeRequired)
             {
@@ -254,15 +273,15 @@ namespace YTMP
                 SetSearchBar(1);
             }
 
-            int[] results = playlistGrid2.Search(search);
+            int[] results = playlistGrid.Search(search);
 
             bool changed = false;
             
-            foreach (DataGridViewRow row in playlistGrid2.Rows)
+            foreach (DataGridViewRow row in playlistGrid.Rows)
             {
                 if (row.Visible != results.Contains(row.Index))
                 {
-                    if (row.Visible) { playlistGrid2.HideRow(row.Index); } else { playlistGrid2.HideRow(row.Index); }
+                    if (row.Visible) { playlistGrid.HideRow(row.Index); } else { playlistGrid.HideRow(row.Index); }
 
                     changed = true;
                 }
@@ -288,7 +307,7 @@ namespace YTMP
 
             playlist[ID] = (object[])entry[1];
             
-            playlistGrid2.AddVideo(ID, (object[])entry[1], true);
+            playlistGrid.AddVideo(ID, (object[])entry[1], true);
 
             newPlaylistButton.Enabled = true;
 
@@ -362,7 +381,7 @@ namespace YTMP
 
         private void exportFileButton_Click(object sender, EventArgs e)
         {
-            playlistGrid2.Export(online);
+            playlistGrid.Export(online);
         }
 
         private void importFileButton_Click(object sender, EventArgs e)
@@ -372,7 +391,7 @@ namespace YTMP
                 switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
                     case (DialogResult.Yes):
-                        playlistGrid2.Export(online);
+                        playlistGrid.Export(online);
                         break;
                     case (DialogResult.Cancel):
                         return;
@@ -389,7 +408,7 @@ namespace YTMP
 
                 foreach (string item in items)
                 {
-                    playlistGrid2.AddVideo(item, playlist[item], online);
+                    playlistGrid.AddVideo(item, playlist[item], online);
                 }
 
                 newPlaylistButton.Enabled = true;
@@ -403,7 +422,7 @@ namespace YTMP
                 switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you make a new one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
                     case (DialogResult.Yes):
-                        playlistGrid2.Export(online);
+                        playlistGrid.Export(online);
                         break;
                     case (DialogResult.Cancel):
                         return;
@@ -420,7 +439,7 @@ namespace YTMP
                 return;
             }
 
-            playlistGrid2.Advance();
+            playlistGrid.Advance();
         }
 
         private void previousButton_Click(object sender, EventArgs e)
@@ -430,14 +449,14 @@ namespace YTMP
                 return;
             }
 
-            playlistGrid2.Retreat();
+            playlistGrid.Retreat();
         }
 
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
             if (videoNameLabel.Text.Substring(0, 3) != "[-]")
             {
-                playlistGrid2.SelectCurrentRow();
+                playlistGrid.SelectCurrentRow();
             }
         }
 
@@ -467,9 +486,9 @@ namespace YTMP
 
         private void UpdateVideoDetails(int index)
         {
-            videoNameLabel.Text = "[" + (index + 1) + "] " + playlistGrid2.GetVideoName(index);
-            videoUploaderLabel.Text = "Uploaded by " + playlistGrid2.GetUploader(index);
-            videoDescriptionBox.Text = playlistGrid2.GetDescription(index);
+            videoNameLabel.Text = "[" + (index + 1) + "] " + playlistGrid.GetVideoName(index);
+            videoUploaderLabel.Text = "Uploaded by " + playlistGrid.GetUploader(index);
+            videoDescriptionBox.Text = playlistGrid.GetDescription(index);
         }
 
         private void UpdateUIElements()
@@ -498,12 +517,12 @@ namespace YTMP
                 {
                     playlist[videos[i]] = (object[])framework.GetVideoDetails(videos[i])[1];
 
-                    playlistGrid2.AddVideo(videos[i], playlist[videos[i]], online);
+                    playlistGrid.AddVideo(videos[i], playlist[videos[i]], online);
                 }
 
                 newPlaylistButton.Enabled = true;
 
-                if (import.GetCheckState()) { playlistGrid2.Export(online); }
+                if (import.GetCheckState()) { playlistGrid.Export(online); }
             }
         }
 
@@ -540,7 +559,7 @@ namespace YTMP
 
         private void shuffleToggleButton_Click(object sender, EventArgs e)
         {
-            bool shuffle = playlistGrid2.ToggleShuffle();
+            bool shuffle = playlistGrid.ToggleShuffle();
 
             if (shuffle)
             {

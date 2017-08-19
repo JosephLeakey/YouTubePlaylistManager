@@ -30,6 +30,8 @@ namespace YTPM
             AllowUserToResizeColumns = false;
             AllowUserToResizeRows = false;
 
+            CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+
             ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 
             RowHeadersVisible = false;

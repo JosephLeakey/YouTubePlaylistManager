@@ -14,8 +14,6 @@ namespace YTMP
     {
         private Framework framework;
 
-        private Dictionary<String, object> DJSON;
-
         private const string addressBoxText = "Paste a YouTube playlist's URL in here to import it...";
 
         public ImportForm(Framework framework)

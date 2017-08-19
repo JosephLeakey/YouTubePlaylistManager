@@ -59,7 +59,7 @@ namespace YTPM
 
         public Player() : base(string.Empty)
         {
-            Cef.Initialize(new CefSettings());
+            if (!Cef.IsInitialized) { Cef.Initialize(new CefSettings()); }
             
             Size = new Size(480, 270);
 
