@@ -86,6 +86,8 @@ namespace YTMP
         {
             player = new Player();
 
+            player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
+
             player.Location = new Point(770, 30);
 
             player.LoadHtml(Player.HTML, "http://HTML/");
@@ -284,7 +286,7 @@ namespace YTMP
             {
                 if (row.Visible != results.Contains(row.Index))
                 {
-                    if (row.Visible) { playlistGrid.HideRow(row.Index); } else { playlistGrid.HideRow(row.Index); }
+                    if (row.Visible) { playlistGrid.HideRow(row.Index); } else { playlistGrid.ShowRow(row.Index); }
 
                     changed = true;
                 }

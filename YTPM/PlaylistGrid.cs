@@ -122,6 +122,8 @@ namespace YTPM
                 Rows.Add(RowCount + 1, ID, details[0], details[1], details[2], details[3]);
             }
 
+            if (queue.Count > 0) { queue.Clear(); }
+
             visible += 1;
         }
 
@@ -129,7 +131,7 @@ namespace YTPM
         {
             if (!shuffle)
             {
-                queue.Clear();
+                if (queue.Count > 0) { queue.Clear(); }
 
                 if (current >= RowCount - 1) { current = 0; } else { current += 1; }
             }
@@ -165,7 +167,7 @@ namespace YTPM
         {
             if (!shuffle)
             {
-                queue.Clear();
+                if (queue.Count > 0) { queue.Clear(); }
 
                 if (current <= 0) { current = RowCount - 1; } else { current -= 1; }
             }
@@ -203,7 +205,7 @@ namespace YTPM
         {
             List<int> results = new List<int>();
 
-            if (text == null || text == String.Empty)
+            if (text == null || text == string.Empty)
             {
                 foreach (DataGridViewRow row in Rows) { results.Add(row.Index); }
 
@@ -288,6 +290,8 @@ namespace YTPM
 
                 return;
             }
+
+            if (queue.Count > 0) { queue.Clear(); }
 
             current = e.RowIndex;
         }
