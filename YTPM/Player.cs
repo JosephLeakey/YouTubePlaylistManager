@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CefSharp;
 using CefSharp.WinForms;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace YTPM
 {
@@ -62,6 +63,8 @@ namespace YTPM
             if (!Cef.IsInitialized) { Cef.Initialize(new CefSettings()); }
             
             Size = new Size(480, 270);
+
+            Dock = DockStyle.None;
 
             BackColor = Color.Black;
         }

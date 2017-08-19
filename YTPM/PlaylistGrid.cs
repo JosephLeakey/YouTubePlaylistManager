@@ -512,13 +512,7 @@ namespace YTPM
         {
             if (SelectedRows.Count == 0)
             {
-                for (int c = 0; c < RowCount; c++)
-                {
-                    if (c >= i)
-                    {
-                        Rows[c].Cells[0].Value = c + 1;
-                    }
-                }
+                for (int c = i; c < RowCount; c++) { Rows[c].Cells[0].Value = c + 1; }
 
                 i = -1;
 
@@ -537,7 +531,7 @@ namespace YTPM
             }
         }
 
-        public void Reset() { Rows.Clear(); current = -1; }
+        public void Reset() { Rows.Clear(); current = -1; visible = 0; }
 
         public void Export(bool full)
         {

@@ -184,7 +184,9 @@ namespace YTMP
             }
             else
             {
-                return new object[] { ID, ExtractVideoDetails(GetDJSON(ID, false)) };
+                Dictionary<String, object> DJSON = GetDJSON(ID, false);
+
+                if (DJSON == null) { return null; } else { return new object[] { ID, ExtractVideoDetails(DJSON) }; }
             }
         }
 
@@ -226,15 +228,13 @@ namespace YTMP
             catch (WebException WE) { return false; }
         }
 
-        public string[] Import(Dictionary<string, object[]> playlist, string fileName)
+        public string[] Import(Dictionary<string, object[]> playlist, string fileName, bool full)
         {
             string line, ID;
 
             List<string> results = new List<string>();
 
             playlist.Clear();
-
-            bool available = YouTubeAvailable(true);
 
             try
             {
@@ -246,11 +246,15 @@ namespace YTMP
                         {
                             ID = line.Substring(0, videoIDLength);
 
-                            if (available)
+                            if (full)
                             {
-                                if (VideoExists(ID))
+                                object[] details = GetVideoDetails(ID);
+
+                                if (details != null)
                                 {
-                                    playlist[ID] = (object[])GetVideoDetails(ID)[1];
+                                    details = (object[])details[1];
+
+                                    playlist[ID] = details;
 
                                     results.Add(ID);
                                 }

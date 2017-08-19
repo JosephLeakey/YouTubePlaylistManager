@@ -63,7 +63,7 @@ namespace YTMP
             playlistGrid.EnableHeadersVisualStyles = false;
 
             playlistGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
-            playlistGrid.ColumnHeadersDefaultCellStyle.BackColor = SystemColors.ControlDark;
+            playlistGrid.ColumnHeadersDefaultCellStyle.BackColor = SystemColors.ControlDarkDark;
             playlistGrid.ColumnHeadersDefaultCellStyle.ForeColor = SystemColors.ControlLightLight;
             playlistGrid.ColumnHeadersDefaultCellStyle.Font = new Font(playlistGrid.ColumnHeadersDefaultCellStyle.Font, FontStyle.Bold);
 
@@ -76,6 +76,8 @@ namespace YTMP
 
             playlistGrid.Size = new Size(742, 600);
             playlistGrid.Location = new Point(14, 67);
+
+            playlistGrid.CellDoubleClick += new DataGridViewCellEventHandler(PlaylistGrid_DoubleClick);
 
             this.Controls.Add(playlistGrid);
         }
@@ -113,10 +115,9 @@ namespace YTMP
                 ((ToolStripDropDownMenu)menuItem.DropDown).ShowImageMargin = false;
             }
 
-            //Display placeholder text within the search-bar
-            searchBox.Text = searchBoxText;
-
             SetFullView(false);
+
+            SetSearchBar(0);
         }
 
         private void SetSearchBar(int mode)
@@ -213,18 +214,19 @@ namespace YTMP
 
             exportFileButton.Enabled = export;
 
-            string search = GetSearchText();
+            unsaved = false;
 
-            if (search.Length < 10 || framework.VideoExists(search.Substring(search.Length - 11)))
+            if (searchBox.ForeColor != SystemColors.ControlDark)
             {
-                SetSearchBar(2);
-            }
-            else
-            {
+                string search = GetSearchText();
+
+                if (search.Length > 10 && framework.VideoExists(search.Substring(search.Length - 11)))
+                {
+                    SetSearchBar(2); return;
+                }
+
                 SetSearchBar(0);
             }
-
-            unsaved = false;
         }
 
         public void PlayVideo(int index)
@@ -240,7 +242,8 @@ namespace YTMP
 
             if (InvokeRequired)
             {
-                BeginInvoke((MethodInvoker)delegate () {
+                BeginInvoke((MethodInvoker)delegate ()
+                {
                     UpdateVideoDetails(index);
                     UpdateUIElements();
                 });
@@ -250,7 +253,7 @@ namespace YTMP
                 UpdateVideoDetails(index);
                 UpdateUIElements();
             }
-            
+
             SetFullView(true);
         }
 
@@ -276,7 +279,7 @@ namespace YTMP
             int[] results = playlistGrid.Search(search);
 
             bool changed = false;
-            
+
             foreach (DataGridViewRow row in playlistGrid.Rows)
             {
                 if (row.Visible != results.Contains(row.Index))
@@ -306,7 +309,7 @@ namespace YTMP
             object[] entry = framework.GetVideoDetails(ID);
 
             playlist[ID] = (object[])entry[1];
-            
+
             playlistGrid.AddVideo(ID, (object[])entry[1], true);
 
             newPlaylistButton.Enabled = true;
@@ -404,7 +407,7 @@ namespace YTMP
 
                 online = framework.YouTubeAvailable(true);
 
-                string[] items = framework.Import(playlist, loadFileDialog.FileName);
+                string[] items = framework.Import(playlist, loadFileDialog.FileName, online);
 
                 foreach (string item in items)
                 {
@@ -439,7 +442,7 @@ namespace YTMP
                 return;
             }
 
-            playlistGrid.Advance();
+            PlayVideo(playlistGrid.Advance());
         }
 
         private void previousButton_Click(object sender, EventArgs e)
@@ -449,7 +452,7 @@ namespace YTMP
                 return;
             }
 
-            playlistGrid.Retreat();
+            PlayVideo(playlistGrid.Retreat());
         }
 
         private void videoNameLabel_Click(object sender, EventArgs e)
@@ -584,6 +587,11 @@ namespace YTMP
                 + "\nwrapper (developed by the CefSharp community and"
                 + "\nmade available on the terms of the BSD license).",
                 "About YouTube Playlist Manager");
+        }
+
+        private void PlaylistGrid_DoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            PlayVideo(e.RowIndex);
         }
     }
 
