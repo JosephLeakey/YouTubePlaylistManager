@@ -65,7 +65,5 @@ namespace YTPM
 
             BackColor = Color.Black;
         }
-
-        public void Load() { LoadHtml(Player.HTML, "http://HTML/"); }
     }
 }

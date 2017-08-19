@@ -540,7 +540,7 @@ namespace YTMP
 
         private void shuffleToggleButton_Click(object sender, EventArgs e)
         {
-            bool shuffle = !playlistGrid2.ToggleShuffle();
+            bool shuffle = playlistGrid2.ToggleShuffle();
 
             if (shuffle)
             {
@@ -550,200 +550,6 @@ namespace YTMP
             {
                 shuffleToggleButton.Text = "Shuffle: OFF";
             }
-        }
-
-        private void playlistGrid_CellEndEdit(object sender, DataGridViewCellEventArgs e)
-        {
-            if (playlistGrid.Rows[e.RowIndex].Cells[0].Value == null) { playlistGrid.Rows[e.RowIndex].Cells[0].Value = e.RowIndex + 1; return; }
-
-            MoveRow(e.RowIndex, int.Parse(playlistGrid.Rows[e.RowIndex].Cells[0].Value.ToString()) - 1);
-        }
-
-        private void MoveRow(int selected, int index)
-        {
-            if (index < 0)
-            {
-                index = 0;
-            }
-            else if (index >= playlist.Count)
-            {
-                index = playlist.Count - 1;
-            }
-
-            if (index == selected) { return; }
-
-            if (shuffleQueue.Contains(selected)) { shuffleQueue[shuffleQueue.IndexOf(selected)] = -1; }
-
-            if (selected == current)
-            {
-                current = index;
-
-                if (player.Visible) { UpdateVideoNameTag(current + 1); }
-            }
-            else if (index > selected && current > selected && current <= index)
-            {
-                current -= 1;
-
-                if (player.Visible) { UpdateVideoNameTag(current + 1); }
-            }
-            else if (index < selected && current < selected && current >= index)
-            {
-                current += 1;
-
-                if (player.Visible) { UpdateVideoNameTag(current + 1); }
-            }
-
-            string cache = listing[selected];
-
-            if (index > selected)
-            {
-                for (int i = selected + 1; i <= index; i++)
-                {
-                    listing[i - 1] = listing[i];
-
-                    playlistGrid.Rows[i].Cells[0].Value = i;
-
-                    if (shuffleQueue.Contains(i)) { shuffleQueue[shuffleQueue.IndexOf(i)] -= 1; }
-                }
-            }
-            else
-            {
-                for (int i = selected - 1; i >= index; i--)
-                {
-                    listing[i + 1] = listing[i];
-
-                    playlistGrid.Rows[i].Cells[0].Value = i + 2;
-
-                    if (shuffleQueue.Contains(i)) { shuffleQueue[shuffleQueue.IndexOf(i)] += 1; }
-                }
-            }
-
-            playlistGrid.Rows[selected].Cells[0].Value = index + 1;
-
-            if (shuffleQueue.Contains(-1)) { shuffleQueue[shuffleQueue.IndexOf(-1)] = index; }
-
-            listing[index] = cache;
-            
-            playlistGrid.Sort(playlistGrid.Columns[0], ListSortDirection.Ascending);
-
-            if (searchBox.ForeColor != SystemColors.ControlDark && searchBox.TextLength > 0)
-            {
-                string search = GetSearchText();
-                
-                bool visible = false;
-
-                if (search == playlistGrid.Rows[index].Cells[0].Value.ToString()) { visible = true; }
-
-                if (!visible)
-                {
-                    if (search.Length > 10 && search.Substring(search.Length - 11) == playlistGrid.Rows[index].Cells[1].Value.ToString()) { visible = true; }
-
-                    if (!visible)
-                    {
-                        search = search.ToLower();
-
-                        for (int i = 2; i < 4; i++)
-                        {
-                            if (!visible && i != 1 && playlistGrid.Rows[index].Cells[i].Value.ToString().ToLower().Contains(search))
-                            {
-                                visible = true;
-                            }
-                        }
-
-                        if (!visible)
-                        {
-                            visibleCount -= 1;
-
-                            if (visibleCount == 0)
-                            {
-                                SetSearchBar(0);
-                            }
-                            else
-                            {
-                                playlistGrid.Rows[index].Visible = false;
-
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
-            playlistGrid.ClearSelection();
-
-            playlistGrid.Rows[index].Selected = true;
-        }
-
-        private void SwapRows(int A, int B)
-        {
-            if (A == B) { return; }
-
-            if (A > B) { B += A; A = B - A; B -= A; }
-
-            if (A < 0) { A = 0; }
-
-            if (B >= playlist.Count) { B = playlist.Count - 1; }
-
-            playlistGrid.Rows[A].Cells[0].Value = B + 1;
-            playlistGrid.Rows[B].Cells[0].Value = A + 1;
-
-            if (current == A) { current = B; } else if (current == B) { current = A; }
-
-            if (current == A || current == B) { UpdateVideoNameTag(current + 1); }
-
-            string cache = listing[A];
-
-            listing[A] = listing[B];
-            listing[B] = cache;
-
-            bool AQueue = shuffleQueue.Contains(A);
-            bool BQueue = shuffleQueue.Contains(B);
-
-            if (!AQueue && !BQueue)
-            {
-                return;
-            }
-
-            if (AQueue && BQueue)
-            {
-                shuffleQueue[shuffleQueue.IndexOf(A)] = -1;
-                shuffleQueue[shuffleQueue.IndexOf(B)] = A;
-                shuffleQueue[shuffleQueue.IndexOf(-1)] = B;
-
-                return;
-            }
-
-            if (AQueue)
-            {
-                shuffleQueue[shuffleQueue.IndexOf(A)] = B;
-
-                return;
-            }
-
-            if (BQueue)
-            {
-                shuffleQueue[shuffleQueue.IndexOf(B)] = A;
-
-                return;
-            }
-        }
-
-        private void playlistGrid_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
-        {
-            e.Control.KeyPress -= CheckKeyPress;
-            e.Control.KeyPress += CheckKeyPress;
-        }
-
-        private void CheckKeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back && e.KeyChar != (char)Keys.Enter) { e.Handled = true; } else { e.Handled = false; }
-        }
-
-        private void playlistGrid_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
-        {
-            e.SortResult = int.Parse(e.CellValue1.ToString()).CompareTo(int.Parse(e.CellValue2.ToString()));
-
-            e.Handled = true;
         }
 
         private void AboutButton_Click(object sender, EventArgs e)
@@ -784,7 +590,7 @@ namespace YTMP
                     return;
                 }
 
-                form.ChangeVideo(true);
+                //form.ChangeVideo(true);
             }
         }
     }
