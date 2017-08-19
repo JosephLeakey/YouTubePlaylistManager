@@ -21,6 +21,8 @@ namespace YTPM
         private List<int> queue = new List<int>();
 
         private ContextMenu menu = new ContextMenu();
+        
+        private SaveFileDialog save = new SaveFileDialog();
 
         public PlaylistGrid()
         {
@@ -121,7 +123,7 @@ namespace YTPM
             visible += 1;
         }
 
-        public void Advance()
+        public int Advance()
         {
             if (!shuffle)
             {
@@ -137,21 +139,27 @@ namespace YTPM
 
                 if (queue.Count >= RowCount)
                 {
-                    if (index == queue.Count - 1) { current = queue[0]; } else { current = queue[index + 1]; } return;
+                    if (index == queue.Count - 1) { current = queue[0]; } else { current = queue[index + 1]; }
                 }
+                else if (index < queue.Count - 1)
+                {
+                    current = queue[index + 1];
+                }
+                else
+                {
+                    Random RNGesus = new Random(); int random;
+                    do { random = RNGesus.Next(0, RowCount); } while (random == current || queue.Contains(random));
 
-                if (index < queue.Count - 1) { current = queue[index + 1]; return; }
+                    current = random;
 
-                Random RNGesus = new Random(); int random;
-                do { random = RNGesus.Next(0, RowCount); } while (random == current || queue.Contains(random));
-
-                current = random;
-
-                queue.Add(random);
+                    queue.Add(random);
+                }
             }
+
+            return current;
         }
 
-        public void Retreat()
+        public int Retreat()
         {
             if (!shuffle)
             {
@@ -167,28 +175,38 @@ namespace YTPM
 
                 if (queue.Count >= RowCount)
                 {
-                    if (index == 0) { current = queue[queue.Count - 1]; } else { current = queue[index - 1]; } return;
+                    if (index == 0) { current = queue[queue.Count - 1]; } else { current = queue[index - 1]; }
                 }
+                else if (index > 0)
+                {
+                    current = queue[index - 1];
+                }
+                else
+                {
+                    Random RNGesus = new Random(); int random;
+                    do { random = RNGesus.Next(0, RowCount); } while (random == current || queue.Contains(random));
 
-                if (index > 0) { current = queue[index - 1]; return; }
+                    current = random;
 
-                Random RNGesus = new Random(); int random;
-                do { random = RNGesus.Next(0, RowCount); } while (random == current || queue.Contains(random));
-
-                current = random;
-
-                queue.Insert(0, random);
+                    queue.Insert(0, random);
+                }
             }
+
+            return current;
         }
+
+        public bool ToggleShuffle() { shuffle = !shuffle; return shuffle; }
 
         public int[] Search(string text)
         {
+            List<int> results = new List<int>();
+
             if (text == null || text == String.Empty)
             {
-                return new int[0];
-            }
+                foreach (DataGridViewRow row in Rows) { results.Add(row.Index); }
 
-            List<int> results = new List<int>();
+                return results.ToArray();
+            }
 
             int parse;
 
@@ -203,16 +221,38 @@ namespace YTPM
                 {
                     if (text == row.Cells[1].Value.ToString()) { results.Add(row.Index); continue; }
 
-                    text = text.ToLower();
-
                     for (int i = 2; i < 4; i++)
                     {
-                        if (row.Cells[i].Value.ToString().ToLower().Contains(text)) { results.Add(row.Index); break; }
+                        if (row.Cells[i].Value.ToString().ToLower().Contains(text.ToLower())) { results.Add(row.Index); break; }
                     }
                 }
             }
 
             if (results.Count > 0) { return results.ToArray(); } else { return new int[0]; }
+        }
+
+        public void HideRow(int index)
+        {
+            if (index < 0 || index >= RowCount) { throw new IndexOutOfRangeException(); }
+
+            if (Rows[index].Visible)
+            {
+                Rows[index].Visible = false;
+
+                visible -= 1;
+            }
+        }
+
+        public void ShowRow(int index)
+        {
+            if (index < 0 || index >= RowCount) { throw new IndexOutOfRangeException(); }
+
+            if (!Rows[index].Visible)
+            {
+                Rows[index].Visible = true;
+
+                visible += 1;
+            }
         }
 
         private void PlaylistGrid_MouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -366,6 +406,53 @@ namespace YTPM
             Rows[target].Selected = true;
         }
 
+        private void SwapRows(int A, int B)
+        {
+            if (A == B) { return; }
+
+            if (A > B) { B += A; A = B - A; B -= A; }
+
+            if (A < 0) { A = 0; }
+
+            if (B >= RowCount) { B = RowCount - 1; }
+
+            Rows[A].Cells[0].Value = B + 1;
+            Rows[B].Cells[0].Value = A + 1;
+
+            if (current == A) { current = B; } else if (current == B) { current = A; }
+
+            bool AQueue = queue.Contains(A);
+            bool BQueue = queue.Contains(B);
+
+            if (!AQueue && !BQueue)
+            {
+                return;
+            }
+
+            if (AQueue && BQueue)
+            {
+                queue[queue.IndexOf(A)] = -1;
+                queue[queue.IndexOf(B)] = A;
+                queue[queue.IndexOf(-1)] = B;
+
+                return;
+            }
+
+            if (AQueue)
+            {
+                queue[queue.IndexOf(A)] = B;
+
+                return;
+            }
+
+            if (BQueue)
+            {
+                queue[queue.IndexOf(B)] = A;
+
+                return;
+            }
+        }
+
         private void PlaylistGrid_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
             DeletionPreparation();
@@ -448,6 +535,48 @@ namespace YTPM
             }
         }
 
+        public void Reset() { Rows.Clear(); current = -1; }
+
+        public void Export(bool full)
+        {
+            if (RowCount == 0 || save.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            using (System.IO.StreamWriter SW = new System.IO.StreamWriter(save.FileName))
+            {
+                if (full)
+                {
+                    for (int i = 0; i < RowCount; i++)
+                    {
+                        if (i < RowCount - 1)
+                        {
+                            SW.WriteLine(Rows[i].Cells[1].Value.ToString() + " - [" + (i + 1) + "] (" + Rows[i].Cells[3].Value.ToString() + ") " + Rows[i].Cells[2].Value.ToString());
+                        }
+                        else
+                        {
+                            SW.Write(Rows[i].Cells[1].Value.ToString() + " - [" + (i + 1) + "] (" + Rows[i].Cells[3].Value.ToString() + ") " + Rows[i].Cells[2].Value.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < RowCount; i++)
+                    {
+                        if (i < RowCount - 1)
+                        {
+                            SW.WriteLine(Rows[i].Cells[2].Value.ToString());
+                        }
+                        else
+                        {
+                            SW.Write(Rows[i].Cells[2].Value.ToString());
+                        }
+                    }
+                }
+            }
+        }
+
         private void PlaylistGrid_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
             e.SortResult = int.Parse(e.CellValue1.ToString()).CompareTo(int.Parse(e.CellValue2.ToString())); e.Handled = true;
@@ -456,5 +585,23 @@ namespace YTPM
         public int GetCurrentIndex() { return current; }
 
         public int GetVisibleCount() { return visible; }
+
+        public string GetID(int index) { return Rows[index].Cells[1].Value.ToString(); }
+
+        public string GetVideoName(int index) { return Rows[index].Cells[2].Value.ToString(); }
+
+        public string GetUploader(int index) { return Rows[index].Cells[3].Value.ToString(); }
+
+        public string GetDescription(int index) { return Rows[index].Cells[4].Value.ToString(); }
+
+        public bool ContainsID(string ID)
+        {
+            for (int i = 0; i < RowCount; i++)
+            {
+                if (Rows[i].Cells[1].Value.ToString() == ID) { return true; }
+            }
+
+            return false;
+        }
     }
 }

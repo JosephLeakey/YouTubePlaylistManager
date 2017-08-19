@@ -14,6 +14,7 @@ using CefSharp;
 using CefSharp.WinForms;
 using System.Security.Permissions;
 using System.Threading;
+using YTPM;
 
 namespace YTMP
 {
@@ -23,56 +24,9 @@ namespace YTMP
     {
         private Framework framework;
 
-        private ChromiumWebBrowser player;
+        private PlaylistGrid playlistGrid2;
 
-        private const string HTML = @"<meta http-equiv=""X-UA-Compatible"" content=""IE=edge""/>
- <html>
-  <body style=""margin: 0"">
-    <div id=""player""></div>
-
-    <script>
-      var tag = document.createElement('script');
-
-      tag.src = ""https://www.youtube.com/iframe_api"";
-      var firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-	  
-      var player;
-
-      function onYouTubeIframeAPIReady()
-      {
-        player = new YT.Player('player', {
-          height: '100%',
-          width: '100%',
-          playerVars: {
-            autoplay: 1,
-            enablejsapi: 1,
-            iv_load_policy: 3,
-            modestbranding: 1,
-            rel: 0
-            },
-          events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-            }
-        });
-      }
-
-      function onPlayerReady(event) {
-        event.target.playVideo();
-      }
-
-      function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.ENDED) {
-            interface.nextVideo();
-        }
-      }
-    </script>
-  </body>
-</html>";
-
-        //The menu that will be displayed when a row in the playlist is right-clicked on
-        private ContextMenu menu = new ContextMenu();
+        private Player player;
 
         //The text to be displayed in the searchbar when it's inactive
         private const string searchBoxText = "Search through the playlist or add a video to it...";
@@ -80,28 +34,11 @@ namespace YTMP
         //Tracks whether or not changes have been made to the current playlist since it was previously exported/imported
         private bool unsaved = false;
 
-        //Tracks the indexes of the playlist entries that users may choose to delete
-        private int deletionIndex = -1;
-
-        private string preservationID;
-
-        private int visibleCount;
-
         private bool online;
-
-        private DataGridViewCellStyle numberCellStyle;
 
         public Dictionary<string, object[]> playlist = new Dictionary<string, object[]>();
 
-        public Dictionary<int, string> listing = new Dictionary<int, string>();
-
-        public int current;
-
         public bool autoplay = true;
-
-        public bool shuffle = false;
-
-        private List<int> shuffleQueue = new List<int>();
 
         public MainForm()
         {
@@ -109,22 +46,28 @@ namespace YTMP
 
             InitializeComponent();
 
-            InitializePlayer(ref player);
+            InitializePlaylistGrid(playlistGrid2);
 
-            numberCellStyle = NumberCellStyle();
+            InitializePlayer(ref player);
         }
 
-        private void InitializePlayer(ref ChromiumWebBrowser player)
+        private void InitializePlaylistGrid(ref PlaylistGrid playlistGrid)
         {
-            Cef.Initialize(new CefSettings());
+            playlistGrid = new PlaylistGrid();
 
-            player = new ChromiumWebBrowser(string.Empty);
-            player.Size = new Size(480, 270);
+            playlistGrid.Size = new Size(742, 600);
+            playlistGrid.Location = new Point(14, 67);
+
+            this.Controls.Add(playlistGrid);
+        }
+
+        private void InitializePlayer(ref Player player)
+        {
+            player = new Player();
+
             player.Location = new Point(770, 30);
-            player.BackColor = Color.Black;
-            player.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
 
-            player.LoadHtml(HTML, "http://HTML/");
+            player.LoadHtml(Player.HTML, "http://HTML/");
             player.RegisterJsObject("interface", new JavascriptInterface(this, framework));
 
             this.Controls.Add(player);
@@ -153,8 +96,6 @@ namespace YTMP
 
             //Display placeholder text within the search-bar
             searchBox.Text = searchBoxText;
-
-            menu.MenuItems.Add(new MenuItem("Delete", new EventHandler(DeleteMenuItemEventHandler)));
 
             SetFullView(false);
         }
@@ -195,35 +136,6 @@ namespace YTMP
             }
 
             return search;
-        }
-
-        private void Playlist_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            playlistGrid.ClearSelection();
-
-            playlistGrid.Rows[e.RowIndex].Selected = true;
-
-            if (e.ColumnIndex == 0)
-            {
-                playlistGrid.CurrentCell = playlistGrid.Rows[e.RowIndex].Cells[0];
-
-                playlistGrid.BeginEdit(true);
-
-                return;
-            }
-
-            if (!CheckYouTube(false, true))
-            {
-                SetFullView(false);
-
-                return;
-            }
-
-            shuffleQueue.Clear();
-
-            current = e.RowIndex;
-
-            PlayVideo(e.RowIndex);
         }
 
         public void SetFullView(bool state)
@@ -278,6 +190,8 @@ namespace YTMP
         {
             SetFullView(false);
 
+            playlistGrid2.Reset();
+
             exportFileButton.Enabled = export;
 
             string search = GetSearchText();
@@ -296,25 +210,25 @@ namespace YTMP
 
         public void PlayVideo(int index)
         {
-            if (!framework.VideoExists(listing[current]))
+            if (!framework.VideoExists(playlistGrid2.GetID(index)))
             {
                 MessageBox.Show("This video could not be loaded.\n\nPlease check your internet connection\nand make sure that the video still exists.", "Unable to Load Video", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 return;
             }
 
-            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + listing[current] + @""")");
+            player.GetMainFrame().ExecuteJavaScriptAsync(@"player.loadVideoById(""" + playlistGrid2.GetID(index) + @""")");
 
             if (InvokeRequired)
             {
                 BeginInvoke((MethodInvoker)delegate () {
-                    UpdateVideoDetails(current);
+                    UpdateVideoDetails(index);
                     UpdateUIElements();
                 });
             }
             else
             {
-                UpdateVideoDetails(current);
+                UpdateVideoDetails(index);
                 UpdateUIElements();
             }
             
@@ -340,17 +254,15 @@ namespace YTMP
                 SetSearchBar(1);
             }
 
-            string[] results = framework.Search(playlist, listing, search);
-
-            visibleCount = results.Length;
+            int[] results = playlistGrid2.Search(search);
 
             bool changed = false;
             
-            foreach (DataGridViewRow row in playlistGrid.Rows)
+            foreach (DataGridViewRow row in playlistGrid2.Rows)
             {
-                if (row.Visible != results.Contains(row.Cells[1].Value.ToString()))
+                if (row.Visible != results.Contains(row.Index))
                 {
-                    row.Visible = !row.Visible;
+                    if (row.Visible) { playlistGrid2.HideRow(row.Index); } else { playlistGrid2.HideRow(row.Index); }
 
                     changed = true;
                 }
@@ -375,8 +287,8 @@ namespace YTMP
             object[] entry = framework.GetVideoDetails(ID);
 
             playlist[ID] = (object[])entry[1];
-
-            AddVideoToGrid(ID, (object[])entry[1], true);
+            
+            playlistGrid2.AddVideo(ID, (object[])entry[1], true);
 
             newPlaylistButton.Enabled = true;
 
@@ -384,48 +296,7 @@ namespace YTMP
 
             SetSearchBar(0);
 
-            visibleCount += 1;
-
             unsaved = true;
-        }
-
-        private void AddVideoToGrid(string ID, object[] details, bool format)
-        {
-            if (format)
-            {
-                int time = (int)details[3];
-                string timeString = string.Empty;
-
-                if (time / 86400 > 0)
-                {
-                    timeString += string.Format("{0:00}", time / 86400) + ":";
-
-                    time = time % 86400;
-                }
-
-                if (time / 3600 > 0)
-                {
-                    timeString += string.Format("{0:00}", time / 3600) + ":";
-
-                    time = time % 3600;
-                }
-
-                timeString += string.Format("{0:00}", time / 60) + ":";
-
-                time = time % 60;
-
-                timeString += string.Format("{0:00}", time);
-
-                playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], timeString);
-            }
-            else
-            {
-                playlistGrid.Rows.Add(playlistGrid.RowCount + 1, ID, details[0], details[1], details[2], details[3]);
-            }
-
-            playlistGrid.Rows[playlistGrid.RowCount - 1].Cells[0].Style = numberCellStyle;
-
-            listing[playlistGrid.RowCount - 1] = ID;
         }
 
         private void MinMaxToggleButton_Click(object sender, EventArgs e)
@@ -489,19 +360,9 @@ namespace YTMP
             }
         }
 
-        private void Export()
-        {
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                framework.Export(playlist, listing, saveFileDialog.FileName);
-
-                unsaved = false;
-            }
-        }
-
         private void exportFileButton_Click(object sender, EventArgs e)
         {
-            Export();
+            playlistGrid2.Export(online);
         }
 
         private void importFileButton_Click(object sender, EventArgs e)
@@ -511,7 +372,7 @@ namespace YTMP
                 switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you open another one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
                     case (DialogResult.Yes):
-                        Export();
+                        playlistGrid2.Export(online);
                         break;
                     case (DialogResult.Cancel):
                         return;
@@ -522,148 +383,16 @@ namespace YTMP
             {
                 ResetApplication(false);
 
-                playlist.Clear();
+                online = framework.YouTubeAvailable(true);
 
-                listing.Clear();
+                string[] items = framework.Import(playlist, loadFileDialog.FileName);
 
-                playlistGrid.Rows.Clear();
-
-                online = framework.Import(playlist, loadFileDialog.FileName);
-
-                foreach (string entry in playlist.Keys)
+                foreach (string item in items)
                 {
-                    AddVideoToGrid(entry, playlist[entry], online);
-
-                    listing[playlistGrid.RowCount - 1] = entry;
+                    playlistGrid2.AddVideo(item, playlist[item], online);
                 }
-
-                visibleCount = playlistGrid.RowCount;
 
                 newPlaylistButton.Enabled = true;
-            }
-        }
-
-        private void playlistGrid_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                playlistGrid.Rows[e.RowIndex].Selected = true;
-
-                menu.Show(this, this.PointToClient(MousePosition));
-            }
-        }
-
-        private void playlistGrid_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
-        {
-            DeletionPreparation();
-        }
-
-        private void DeleteMenuItemEventHandler(object sender, EventArgs e)
-        {
-            DeletionPreparation();
-
-            foreach (DataGridViewRow row in playlistGrid.SelectedRows)
-            {
-                playlistGrid.Rows.Remove(row);
-            }
-        }
-
-        private void DeletionPreparation()
-        {
-            if (deletionIndex == -1)
-            {
-                deletionIndex = playlistGrid.SelectedRows[0].Index;
-
-                foreach (DataGridViewRow row in playlistGrid.SelectedRows)
-                {
-                    playlist.Remove(listing[row.Index]);
-                    listing.Remove(row.Index);
-
-                    if (shuffleQueue.Contains(row.Index))
-                    {
-                        shuffleQueue.Remove(row.Index);
-                    }
-
-                    if (row.Index < deletionIndex) { deletionIndex = row.Index; }
-                }
-
-                for (int i = 0; i < shuffleQueue.Count; i++)
-                {
-                    if (shuffleQueue[i] > deletionIndex)
-                    {
-                        int displacement = 0;
-
-                        foreach (DataGridViewRow row in playlistGrid.SelectedRows)
-                        {
-                            if (shuffleQueue[i] > row.Index)
-                            {
-                                displacement += 1;
-                            }
-                        }
-                        
-                        shuffleQueue[i] -= displacement;
-                    }
-                }
-
-                visibleCount -= playlistGrid.SelectedRows.Count;
-
-                if (player.Visible)
-                {
-                    if (listing.ContainsKey(current))
-                    {
-                        preservationID = listing[current];
-                    }
-                    else
-                    {
-                        preservationID = null;
-
-                        UpdateVideoNameTag(0);
-                    }
-                }
-            }
-        }
-
-        private void playlistGrid_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
-        {
-            if (playlistGrid.SelectedRows.Count == 0)
-            {
-                for (int c = 0; c < playlistGrid.RowCount; c++)
-                {
-                    if (c >= deletionIndex)
-                    {
-                        playlistGrid.Rows[c].Cells[0].Value = c + 1;
-
-                        listing[c] = playlistGrid.Rows[c].Cells[1].Value.ToString();
-                    }
-
-                    if (player.Visible && preservationID != null && playlistGrid.Rows[c].Cells[1].Value.ToString() == preservationID)
-                    {
-                        current = c;
-
-                        UpdateVideoNameTag(current + 1);
-
-                        preservationID = null;
-                    }
-                }
-
-                deletionIndex = -1;
-
-                if (visibleCount == 0)
-                {
-                    string search = GetSearchText();
-
-                    if (search.Length < 11 || !framework.VideoExists(search.Substring(search.Length - 11)))
-                    {
-                        SetSearchBar(0);
-                    }
-                    else { Search(); }
-                }
-
-                newPlaylistButton.Enabled = (playlistGrid.RowCount > 0 || player.Visible);
-
-                exportFileButton.Enabled = (playlistGrid.RowCount > 0);
-
-                unsaved = true;
             }
         }
 
@@ -674,16 +403,12 @@ namespace YTMP
                 switch (MessageBox.Show("Your current playlist hasn't been saved.\nWould you like to save it before you make a new one?", "Unsaved Playlist", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
                     case (DialogResult.Yes):
-                        Export();
+                        playlistGrid2.Export(online);
                         break;
                     case (DialogResult.Cancel):
                         return;
                 }
             }
-
-            playlistGrid.Rows.Clear();
-
-            visibleCount = 0;
 
             ResetApplication(false);
         }
@@ -695,81 +420,7 @@ namespace YTMP
                 return;
             }
 
-            ChangeVideo(true);
-        }
-
-        public void ChangeVideo(bool direction)
-        {
-            if (!shuffle)
-            {
-                if ((direction && framework.NextVideo(playlist, listing, ref current) != null) || (!direction && framework.PreviousVideo(playlist, listing, ref current) != null))
-                {
-                    shuffleQueue.Clear();
-
-                    PlayVideo(current);
-                }
-            }
-            else
-            {
-                if (shuffleQueue.Count == 0)
-                {
-                    shuffleQueue.Add(current);
-                }
-
-                int index = shuffleQueue.IndexOf(current);
-
-                int original = current;
-
-                if (shuffleQueue.Count >= playlist.Count && ((direction && index == shuffleQueue.Count - 1) || (!direction && index == 0)))
-                {
-                    if (direction)
-                    {
-                        current = shuffleQueue[0];
-                    }
-                    else
-                    {
-                        current = shuffleQueue[shuffleQueue.Count - 1];
-                    }
-
-                    PlayVideo(current);
-
-                    return;
-                }
-
-                if ((direction && index < shuffleQueue.Count - 1) || (!direction && index > 0))
-                {
-                    if (direction)
-                    {
-                        current = shuffleQueue[index + 1];
-                    }
-                    else
-                    {
-                        current = shuffleQueue[index - 1];
-                    }
-                }
-                else if (framework.RandomVideo(playlist, listing, ref current) == null)
-                {
-                    return;
-                }
-                else
-                {
-                    while (current == original || shuffleQueue.Contains(current))
-                    {
-                        framework.RandomVideo(playlist, listing, ref current);
-                    }
-
-                    if (direction)
-                    {
-                        shuffleQueue.Add(current);
-                    }
-                    else
-                    {
-                        shuffleQueue.Insert(0, current);
-                    }
-                }
-
-                PlayVideo(current);
-            }
+            playlistGrid2.Advance();
         }
 
         private void previousButton_Click(object sender, EventArgs e)
@@ -779,16 +430,14 @@ namespace YTMP
                 return;
             }
 
-            ChangeVideo(false);
+            playlistGrid2.Retreat();
         }
 
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
             if (videoNameLabel.Text.Substring(0, 3) != "[-]")
             {
-                playlistGrid.ClearSelection();
-
-                playlistGrid.Rows[current].Selected = true;
+                playlistGrid2.SelectCurrentRow();
             }
         }
 
@@ -818,11 +467,9 @@ namespace YTMP
 
         private void UpdateVideoDetails(int index)
         {
-            object[] details = playlist[listing[index]];
-
-            videoNameLabel.Text = "[" + (index + 1) + "] " + details[0];
-            videoUploaderLabel.Text = "Uploaded by " + details[1];
-            videoDescriptionBox.Text = (string)details[2];
+            videoNameLabel.Text = "[" + (index + 1) + "] " + playlistGrid2.GetVideoName(index);
+            videoUploaderLabel.Text = "Uploaded by " + playlistGrid2.GetUploader(index);
+            videoDescriptionBox.Text = playlistGrid2.GetDescription(index);
         }
 
         private void UpdateUIElements()
@@ -845,28 +492,18 @@ namespace YTMP
             {
                 ResetApplication(true);
 
-                playlist.Clear();
+                string[] videos = framework.CompilePlaylistVideos(import.GetID());
 
-                listing.Clear();
-
-                playlistGrid.Rows.Clear();
-
-                List<string> videos = framework.CompilePlaylistVideos(import.GetID());
-
-                for (int i = 0; i < videos.Count; i++)
+                for (int i = 0; i < videos.Length; i++)
                 {
                     playlist[videos[i]] = (object[])framework.GetVideoDetails(videos[i])[1];
 
-                    AddVideoToGrid(videos[i], playlist[videos[i]], online);
-
-                    listing[playlistGrid.RowCount - 1] = videos[i];
+                    playlistGrid2.AddVideo(videos[i], playlist[videos[i]], online);
                 }
-
-                visibleCount = playlistGrid.RowCount;
 
                 newPlaylistButton.Enabled = true;
 
-                if (import.GetCheckState()) { Export(); }
+                if (import.GetCheckState()) { playlistGrid2.Export(online); }
             }
         }
 
@@ -903,7 +540,7 @@ namespace YTMP
 
         private void shuffleToggleButton_Click(object sender, EventArgs e)
         {
-            shuffle = !shuffle;
+            bool shuffle = !playlistGrid2.ToggleShuffle();
 
             if (shuffle)
             {

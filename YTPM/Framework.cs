@@ -127,7 +127,7 @@ namespace YTMP
             return details;
         }
         
-        public List<string> CompilePlaylistVideos(string ID)
+        public string[] CompilePlaylistVideos(string ID)
         {
             if (ID.Length < playlistIDLength)
             {
@@ -173,7 +173,7 @@ namespace YTMP
                 }
             } while (DJSON != null);
 
-            return videos;
+            if (videos.Count > 0) { return videos.ToArray(); } else { return null; }
         }
 
         public object[] GetVideoDetails(string ID)
@@ -226,92 +226,60 @@ namespace YTMP
             catch (WebException WE) { return false; }
         }
 
-        public void Export(Dictionary<string, object[]> playlist, Dictionary<int, string> listing, string fileName)
-        {
-            if (listing.Count != playlist.Count || listing.Count == 0)
-            {
-                return;
-            }
-
-            bool full = false;
-
-            using (System.IO.StreamWriter SW = new System.IO.StreamWriter(fileName))
-            {         
-                for (int i = 0; i < listing.Count; i++)
-                {
-                    string ID = listing[i];
-
-                    object[] entry = playlist[ID];
-
-                    if (i < listing.Count - 1)
-                    {
-                        if (entry[1] != string.Empty)
-                        {
-                            SW.WriteLine(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
-                        }
-                        else
-                        {
-                            SW.WriteLine(entry[0]);
-                        }
-                    }
-                    else
-                    {
-                        if (entry[1] != string.Empty)
-                        {
-                            SW.Write(ID + " - [" + (i + 1) + "] (" + entry[1] + ") " + entry[0]);
-                        }
-                        else
-                        {
-                            SW.Write(entry[0]);
-                        }
-                    }
-                }
-            }
-        }
-
-        public bool Import(Dictionary<string, object[]> playlist, string fileName)
+        public string[] Import(Dictionary<string, object[]> playlist, string fileName)
         {
             string line, ID;
 
+            List<string> results = new List<string>();
+
+            playlist.Clear();
+
             bool available = YouTubeAvailable(true);
 
-            using (System.IO.StreamReader SR = new System.IO.StreamReader(fileName))
+            try
             {
-                while ((line = SR.ReadLine()) != null)
+                using (System.IO.StreamReader SR = new System.IO.StreamReader(fileName))
                 {
-                    if (line.Length >= videoIDLength)
+                    while ((line = SR.ReadLine()) != null)
                     {
-                        ID = line.Substring(0, videoIDLength);
-
-                        if (available)
+                        if (line.Length >= videoIDLength)
                         {
-                            if (VideoExists(ID))
-                            {
-                                playlist[ID] = (object[])GetVideoDetails(ID)[1];
-                            }
-                        }
-                        else
-                        {
-                            bool valid = true;
+                            ID = line.Substring(0, videoIDLength);
 
-                            for (int i = 0; i < ID.Length; i++)
+                            if (available)
                             {
-                                if (!char.IsLetterOrDigit(ID[i]) && ID[i] != char.Parse("_"))
+                                if (VideoExists(ID))
                                 {
-                                    valid = false;
+                                    playlist[ID] = (object[])GetVideoDetails(ID)[1];
+
+                                    results.Add(ID);
                                 }
                             }
-
-                            if (valid)
+                            else
                             {
-                                playlist[ID] = new object[] { line, string.Empty, string.Empty, null };
+                                bool valid = true;
+
+                                for (int i = 0; i < ID.Length; i++)
+                                {
+                                    if (!char.IsLetterOrDigit(ID[i]) && ID[i] != char.Parse("_"))
+                                    {
+                                        valid = false;
+                                    }
+                                }
+
+                                if (valid)
+                                {
+                                    playlist[ID] = new object[] { line, string.Empty, string.Empty, null };
+
+                                    results.Add(ID);
+                                }
                             }
                         }
                     }
                 }
-            }
+            } catch (Exception E) { playlist.Clear(); return null; }
 
-            return available;
+            if (results.Count > 0) { return results.ToArray(); } else { return null; }
         }
     }
 }
