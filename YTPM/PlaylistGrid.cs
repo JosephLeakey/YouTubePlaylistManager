@@ -311,10 +311,10 @@ namespace YTPM
         {
             if (Rows[e.RowIndex].Cells[0].Value == null) { Rows[e.RowIndex].Cells[0].Value = e.RowIndex + 1; return; }
 
-            MoveRow(e.RowIndex, int.Parse(Rows[e.RowIndex].Cells[0].Value.ToString()) - 1);
+            MoveRow(e.RowIndex, int.Parse(Rows[e.RowIndex].Cells[0].Value.ToString()) - 1, false);
         }
 
-        private void MoveRow(int source, int target)
+        private void MoveRow(int source, int target, bool sort)
         {
             if (target < 0) { target = 0; } else if (target >= RowCount) { target = RowCount - 1; }
 
@@ -360,56 +360,7 @@ namespace YTPM
 
             if (queue.Contains(-1)) { queue[queue.IndexOf(-1)] = target; }
 
-            Sort(Columns[0], ListSortDirection.Ascending);
-
-            /*
-            if (searchBox.ForeColor != SystemColors.ControlDark && searchBox.TextLength > 0)
-            {
-                string search = GetSearchText();
-
-                bool visible = false;
-
-                if (search == playlistGrid.Rows[target].Cells[0].Value.ToString()) { visible = true; }
-
-                if (!visible)
-                {
-                    if (search.Length > 10 && search.Substring(search.Length - 11) == playlistGrid.Rows[target].Cells[1].Value.ToString()) { visible = true; }
-
-                    if (!visible)
-                    {
-                        search = search.ToLower();
-
-                        for (int i = 2; i < 4; i++)
-                        {
-                            if (!visible && i != 1 && playlistGrid.Rows[target].Cells[i].Value.ToString().ToLower().Contains(search))
-                            {
-                                visible = true;
-                            }
-                        }
-
-                        if (!visible)
-                        {
-                            visibleCount -= 1;
-
-                            if (visibleCount == 0)
-                            {
-                                SetSearchBar(0);
-                            }
-                            else
-                            {
-                                playlistGrid.Rows[target].Visible = false;
-
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-            */
-
-            ClearSelection();
-
-            Rows[target].Selected = true;
+            if (sort) { Sort(Columns[0], ListSortDirection.Ascending); }
         }
 
         private void SwapRows(int A, int B)
@@ -459,6 +410,8 @@ namespace YTPM
             }
         }
 
+        public void Sort() { Sort(Columns[0], ListSortDirection.Ascending); }
+
         private void PlaylistGrid_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
             DeletionPreparation();
@@ -486,7 +439,7 @@ namespace YTPM
                 {
                     if (row.Index < i) { i = row.Index; }
 
-                    if (row.Index < current) { displacement += 1; }
+                    if (row.Index == current) { current = -1; displacement = 0; } else if (row.Index < current) { displacement += 1; }
 
                     if (queue.Contains(row.Index)) { queue.Remove(row.Index); }
                 }
@@ -519,19 +472,6 @@ namespace YTPM
                 for (int c = i; c < RowCount; c++) { Rows[c].Cells[0].Value = c + 1; }
 
                 i = -1;
-
-                /*
-                if (visible == 0)
-                {
-                    string search = GetSearchText();
-
-                    if (search.Length < 11 || !framework.VideoExists(search.Substring(search.Length - 11)))
-                    {
-                        SetSearchBar(0);
-                    }
-                    else { Search(); }
-                }
-                */
             }
         }
 

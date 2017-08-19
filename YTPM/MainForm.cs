@@ -78,6 +78,8 @@ namespace YTMP
             playlistGrid.Location = new Point(14, 67);
 
             playlistGrid.CellDoubleClick += new DataGridViewCellEventHandler(PlaylistGrid_DoubleClick);
+            playlistGrid.CellEndEdit += new DataGridViewCellEventHandler(PlaylistGrid_EndEdit);
+            playlistGrid.RowsRemoved += new DataGridViewRowsRemovedEventHandler(PlaylistGrid_RowsRemoved);
 
             this.Controls.Add(playlistGrid);
         }
@@ -259,7 +261,7 @@ namespace YTMP
             SetFullView(true);
         }
 
-        private void Search()
+        private void SearchBox_TextChanged(object sender, EventArgs e)
         {
             string search = GetSearchText();
 
@@ -296,11 +298,6 @@ namespace YTMP
             {
                 playlistGrid.ClearSelection();
             }
-        }
-
-        private void SearchBox_TextChanged(object sender, EventArgs e)
-        {
-            Search();
         }
 
         private void AddButton_Click(object sender, EventArgs e)
@@ -459,10 +456,7 @@ namespace YTMP
 
         private void videoNameLabel_Click(object sender, EventArgs e)
         {
-            if (videoNameLabel.Text.Substring(0, 3) != "[-]")
-            {
-                playlistGrid.SelectCurrentRow();
-            }
+            playlistGrid.SelectCurrentRow();
         }
 
         private void UpdateVideoName(string name, int number)
@@ -479,13 +473,16 @@ namespace YTMP
 
         private void UpdateVideoNameTag(int number)
         {
-            if (number > 0)
+            if (videoNameLabel.Visible)
             {
-                videoNameLabel.Text = "[" + number + "] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
-            }
-            else
-            {
-                videoNameLabel.Text = "[-] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
+                if (number > 0)
+                {
+                    videoNameLabel.Text = "[" + number + "] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
+                }
+                else
+                {
+                    videoNameLabel.Text = "[-] " + videoNameLabel.Text.Substring(videoNameLabel.Text.IndexOf("]") + 2);
+                }
             }
         }
 
@@ -594,6 +591,56 @@ namespace YTMP
         private void PlaylistGrid_DoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             PlayVideo(e.RowIndex);
+        }
+
+        private void PlaylistGrid_EndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            if (searchBox.ForeColor != SystemColors.ControlDark && searchBox.TextLength > 0)
+            {
+                string search = GetSearchText();
+
+                bool visible = false;
+
+                if (search == playlistGrid.Rows[e.RowIndex].Cells[0].Value.ToString()) { visible = true; }
+
+                if (!visible)
+                {
+                    if (search.Length > 10 && search.Substring(search.Length - 11) == playlistGrid.GetID(e.RowIndex)) { visible = true; }
+
+                    if (!visible)
+                    {
+                        search = search.ToLower();
+
+                        if (!visible && (playlistGrid.GetVideoName(e.RowIndex).Contains(search) || playlistGrid.GetUploader(e.RowIndex).Contains(search))) { visible = true; }
+
+                        if (!visible)
+                        {
+                            playlistGrid.HideRow(e.RowIndex);
+
+                            if (playlistGrid.GetVisibleCount() == 0)
+                            {
+                                SetSearchBar(0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            UpdateVideoNameTag(playlistGrid.GetCurrentIndex() + 1);
+
+            playlistGrid.Sort();
+        }
+
+        private void PlaylistGrid_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
+        {
+            if (playlistGrid.SelectedRows.Count == 0 && searchBox.ForeColor != SystemColors.ControlDark && playlistGrid.GetVisibleCount() == 0)
+            {
+                string search = GetSearchText();
+
+                if (search.Length > 10 && framework.VideoExists(search.Substring(search.Length - 11))) { SetSearchBar(2); } else { SetSearchBar(0); }
+            }
+
+            UpdateVideoNameTag(playlistGrid.GetCurrentIndex() + 1);
         }
     }
 
