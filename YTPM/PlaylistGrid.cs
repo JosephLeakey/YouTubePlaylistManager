@@ -467,7 +467,7 @@ namespace YTPM
 
         private void PlaylistGrid_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
-            if (SelectedRows.Count == 0)
+            if (i > -1 && SelectedRows.Count == 0)
             {
                 for (int c = i; c < RowCount; c++) { Rows[c].Cells[0].Value = c + 1; }
 
