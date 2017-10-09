@@ -157,10 +157,10 @@ namespace YTMP
                 for (int i = 0; i < partial.Count; i++)
                 {
                     dynamic item = partial[i];
+                    
+                    Dictionary<string, object> details = item["contentDetails"];
 
-                    item = item["contentDetails"];
-
-                    videos.Add(item["videoId"]);
+                    if (details.ContainsKey("videoPublishedAt")) { videos.Add(details["videoId"].ToString()); }
                 }
 
                 if (next != null)

@@ -93,7 +93,7 @@ namespace YTMP
             player.Location = new Point(770, 30);
 
             player.LoadHtml(Player.HTML, "http://HTML/");
-            player.RegisterJsObject("interface", new JavascriptInterface(this, framework));
+            player.RegisterJsObject("interface", new JavascriptInterface(this, framework, playlistGrid));
 
             this.Controls.Add(player);
             player.BringToFront();
@@ -648,11 +648,13 @@ namespace YTMP
     {
         private MainForm form;
         private Framework framework;
+        private PlaylistGrid playlistGrid;
 
-        public JavascriptInterface(MainForm form, Framework framework)
+        public JavascriptInterface(MainForm form, Framework framework, PlaylistGrid playlistGrid)
         {
             this.form = form;
             this.framework = framework;
+            this.playlistGrid = playlistGrid;
         }
 
         public void NextVideo()
@@ -666,7 +668,7 @@ namespace YTMP
                     return;
                 }
 
-                //form.ChangeVideo(true);
+                form.PlayVideo(playlistGrid.Advance());
             }
         }
     }
