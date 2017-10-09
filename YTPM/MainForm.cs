@@ -406,14 +406,22 @@ namespace YTMP
 
                 online = framework.YouTubeAvailable(true);
 
-                string[] items = framework.Import(playlist, loadFileDialog.FileName, online);
-
-                foreach (string item in items)
-                {
-                    playlistGrid.AddVideo(item, playlist[item], online);
-                }
+                importFile.RunWorkerAsync();
 
                 newPlaylistButton.Enabled = true;
+            }
+        }
+
+        private void importFile_DoWork(object sender, DoWorkEventArgs e)
+        {
+            e.Result = framework.Import(playlist, loadFileDialog.FileName, online);
+        }
+
+        private void importFile_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            foreach (string item in (string[])e.Result)
+            {
+                playlistGrid.AddVideo(item, playlist[item], online);
             }
         }
 
@@ -513,18 +521,33 @@ namespace YTMP
             {
                 ResetApplication(true);
 
-                string[] videos = framework.CompilePlaylistVideos(import.GetID());
-
-                for (int i = 0; i < videos.Length; i++)
-                {
-                    playlist[videos[i]] = (object[])framework.GetVideoDetails(videos[i])[1];
-
-                    playlistGrid.AddVideo(videos[i], playlist[videos[i]], online);
-                }
+                importURL.RunWorkerAsync(import.GetID());
 
                 newPlaylistButton.Enabled = true;
 
                 if (import.GetCheckState()) { playlistGrid.Export(online); }
+            }
+        }
+        
+        private void importURL_DoWork(object sender, DoWorkEventArgs e)
+        {
+            string[] videos = framework.CompilePlaylistVideos((string)e.Argument);
+
+            for (int i = 0; i < videos.Length; i++)
+            {
+                playlist[videos[i]] = (object[])framework.GetVideoDetails(videos[i])[1];
+            }
+
+            e.Result = videos;
+        }
+
+        private void importURL_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            string[] videos = (string[])e.Result;
+
+            for (int i = 0; i < videos.Length; i++)
+            {
+                playlistGrid.AddVideo(videos[i], playlist[videos[i]], online);
             }
         }
 

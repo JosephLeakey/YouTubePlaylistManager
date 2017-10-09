@@ -56,6 +56,7 @@
             this.nextButton = new System.Windows.Forms.Button();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.importURL = new System.ComponentModel.BackgroundWorker();
+            this.importFile = new System.ComponentModel.BackgroundWorker();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -318,8 +319,15 @@
             // 
             // importURL
             // 
+            this.importURL.WorkerSupportsCancellation = true;
             this.importURL.DoWork += new System.ComponentModel.DoWorkEventHandler(this.importURL_DoWork);
             this.importURL.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.importURL_RunWorkerCompleted);
+            // 
+            // importFile
+            // 
+            this.importFile.WorkerSupportsCancellation = true;
+            this.importFile.DoWork += new System.ComponentModel.DoWorkEventHandler(this.importFile_DoWork);
+            this.importFile.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.importFile_RunWorkerCompleted);
             // 
             // MainForm
             // 
@@ -376,6 +384,7 @@
         public System.Windows.Forms.SaveFileDialog saveFileDialog;
         public System.Windows.Forms.OpenFileDialog loadFileDialog;
         private System.ComponentModel.BackgroundWorker importURL;
+        private System.ComponentModel.BackgroundWorker importFile;
     }
 }
 
