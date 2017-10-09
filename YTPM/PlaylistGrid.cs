@@ -83,7 +83,14 @@ namespace YTPM
             EditingControlShowing += new DataGridViewEditingControlShowingEventHandler(PlaylistGrid_EditingControlShowing);
             SortCompare += new DataGridViewSortCompareEventHandler(PlaylistGrid_SortCompare);
 
+            menu.MenuItems.Add(new MenuItem("Open YouTube Page", new EventHandler(OpenYouTubePageEventHandler)));
+            menu.MenuItems.Add("-");
             menu.MenuItems.Add(new MenuItem("Delete", new EventHandler(DeleteMenuItemEventHandler)));
+        }
+
+        private void OpenYouTubePageEventHandler(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.youtube.com/watch?v=" + SelectedRows[0].Cells[1].Value.ToString());
         }
 
         public void AddVideo(string ID, object[] details, bool format)
