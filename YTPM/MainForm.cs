@@ -224,7 +224,7 @@ namespace YTMP
             {
                 string search = GetSearchText();
 
-                if (search.Length > 10 && framework.VideoExists(search.Substring(search.Length - 11)))
+                if (search.Length > 10 && framework.VideoExists(search.Substring(search.Length - 11)) != null)
                 {
                     SetSearchBar(2); return;
                 }
@@ -235,7 +235,7 @@ namespace YTMP
 
         public void PlayVideo(int index)
         {
-            if (!framework.VideoExists(playlistGrid.GetID(index)))
+            if (framework.VideoExists(playlistGrid.GetID(index)) == null)
             {
                 MessageBox.Show("This video could not be loaded.\n\nPlease check your internet connection\nand make sure that the video still exists.", "Unable to Load Video", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
@@ -265,7 +265,7 @@ namespace YTMP
         {
             string search = GetSearchText();
 
-            if (search.Length > 10 && !playlist.ContainsKey(search.Substring(search.Length - 11)) && framework.VideoExists(search.Substring(search.Length - 11)))
+            if (search.Length > 10 && !playlist.ContainsKey(search.Substring(search.Length - 11)) && framework.VideoExists(search.Substring(search.Length - 11)) != null)
             {
                 SetSearchBar(2);
 
@@ -535,7 +535,9 @@ namespace YTMP
 
             for (int i = 0; i < videos.Length; i++)
             {
-                playlist[videos[i]] = (object[])framework.GetVideoDetails(videos[i])[1];
+                object[] details = framework.GetVideoDetails(videos[i]);
+
+                if (details != null) { playlist[videos[i]] = (object[])details[1]; }
             }
 
             e.Result = videos;
@@ -660,7 +662,7 @@ namespace YTMP
             {
                 string search = GetSearchText();
 
-                if (search.Length > 10 && framework.VideoExists(search.Substring(search.Length - 11))) { SetSearchBar(2); } else { SetSearchBar(0); }
+                if (search.Length > 10 && framework.VideoExists(search.Substring(search.Length - 11)) != null) { SetSearchBar(2); } else { SetSearchBar(0); }
             }
 
             UpdateVideoNameTag(playlistGrid.GetCurrentIndex() + 1);

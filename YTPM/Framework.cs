@@ -36,32 +36,15 @@ namespace YTMP
                 return null;
             }
 
-            using (WC)
+            Dictionary<String, object> DJSON;
+
+            if (!playlist)
             {
-                try
-                {
-                    Dictionary<String, object> DJSON;
-
-                    if (!playlist)
-                    {
-                        if (!VideoExists(ID))
-                        {
-                            return null;
-                        }
-
-                        DJSON = serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/videos?key=" + API + "&part=snippet,contentDetails&id=" + ID));
-                    }
-                    else
-                    {
-                        DJSON = serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/playlistItems?key=" + API + "&part=contentDetails&playlistId=" + ID));
-                    }
-
-                    return DJSON;
-                }
-                catch (Exception e)
-                {
-                    return null;
-                }
+                return VideoExists(ID);
+            }
+            else
+            {
+                return PlaylistExists(ID);
             }
         }
 
@@ -190,24 +173,46 @@ namespace YTMP
             }
         }
 
-        public bool VideoExists(string ID)
+        public Dictionary<String, object> VideoExists(string ID)
         {
             if (ID.Length < videoIDLength)
             {
-                return false;
+                return null;
             }
 
             using (WC)
             {
                 try
                 {
-                    string JSON = WC.DownloadString("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + ID);
+                    Dictionary<String, object> DJSON = serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/videos?key=" + API + "&part=snippet,contentDetails&id=" + ID));
 
-                    return true;
+                    Dictionary<String, object> partial = (Dictionary<String, object>)DJSON["pageInfo"];
+
+                    if ((int)partial["totalResults"] > 0) { return DJSON; } else { return null; }
                 }
                 catch (WebException WE)
                 {
-                    return false;
+                    return null;
+                }
+            }
+        }
+
+        public Dictionary<String, object> PlaylistExists(string ID)
+        {
+            if (ID.Length < playlistIDLength)
+            {
+                return null;
+            }
+
+            using (WC)
+            {
+                try
+                {
+                    return serializer.Deserialize<Dictionary<String, object>>(WC.DownloadString("https://www.googleapis.com/youtube/v3/playlistItems?key=" + API + "&part=contentDetails&playlistId=" + ID));
+                }
+                catch (WebException WE)
+                {
+                    return null;
                 }
             }
         }
